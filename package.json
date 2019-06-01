@@ -1,16 +1,18 @@
 {
   "name": "art_club_back",
   "version": "1.0.0",
-  "description": "\"\"",
+  "description": "Art Club backend",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",  
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/vsvala/Art_Club_back.git"
+  
   },
   "keywords": [
     "acb"
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.13.0",
     "nodemon": "^1.19.1"
   }
 }
