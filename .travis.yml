@@ -10,11 +10,11 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 
 script:
-- npm run travis
+script:
+- npm run test
+- npm run lint
+- npm run codecov
 
 cache:
   directories:
     - node_modules
-    
-install:
-  - npm install
