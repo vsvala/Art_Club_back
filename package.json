@@ -6,13 +6,12 @@
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",  
+    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/vsvala/Art_Club_back.git"
-  
   },
   "keywords": [
     "acb"
@@ -24,6 +23,7 @@
   },
   "homepage": "https://github.com/vsvala/Art_Club_back#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1"
   },
   "devDependencies": {
