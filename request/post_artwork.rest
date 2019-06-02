@@ -1,0 +1,11 @@
+POST http://localhost:3001/api/artworks
+Content-Type: application/json
+
+{
+  "image": "sleebybear.jpg",
+  "artist": "Virva Svala",
+  "name": "Sleepy bear",
+  "year": 2017,
+  "size": "20x30cm",
+  "medium":"aquarelle"
+}

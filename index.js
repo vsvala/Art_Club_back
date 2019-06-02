@@ -1,47 +1,81 @@
+require('dotenv').config()
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors')
+const Artwork = require('./models/artwork')
 
 
 // Middleware
+app.use(express.static('build'))
+app.use(bodyParser.json())
 app.use(cors())
 
-let notes = [
-  {
-    id: 1,
-    content: 'HTML on helppoa',
-    date: '2017-12-10T17:30:31.098Z',
-    important: true,
-  },
-  {
-    id: 2,
-    content: 'Selain pystyy suorittamaan vain javascriptiä',
-    date: '2017-12-10T18:39:34.091Z',
-    important: false,
-  },
-  {
-    id: 3,
-    content: 'HTTP-protokollan tärkeimmät metodit ovat GET ja POST',
-    date: '2017-12-10T19:20:14.298Z',
-    important: true,
-  },
-]
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/notes', (req, res) => {
-  res.json(notes)
+//gets all arworks
+app.get('/api/artworks', (req, res) => {
+  Artwork.find({}).then(artwork => {
+    res.json(artwork.map(artwork => artwork.toJSON()))
+  })
 })
 
-// const PORT = 3001
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`)
+//gets single  artwork with specific id
+app.get('/api/artworks/:id', (req, res) => {
+  Artwork.findById(req.params.id) //Number?
+    .then(artwork => {
+      if(artwork){
+        res.json(artwork.toJSON())
+      }else{
+        res.status(404).end()
+      }
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(400).send({ error: 'malformatted id' })
+    })
+})
+
+app.post('/api/artworks', (req, res) => {
+  const body = req.body
+
+  if (body.image === undefined) {
+    return res.status(400).json({ error: 'image missing' })
+  }
+
+  const artwork = new Artwork({
+    image: 'sleebybear.jpg',
+    artist: 'Virva Svala',
+    name: 'Sleepy bear',
+    year: 2017,
+    size: '20x30cm',
+    medium:'aquarelle',
+  })
+
+  artwork.save().then(savedArtwork => {
+    res.json(savedArtwork.toJSON())
+  })
+})
+
+//deleting  artwork
+// app.delete('/api/artworks/:id', (req, res) => {
+//   const id = Number(req.params.id)
+//   artworks = artworks.filter(artwork => artwork.id !== id)
+
+//   res.status(204).end()
 // })
 
-//this one for heroku
-const PORT = process.env.PORT || 3001
+const error = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(error)
+
+
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
