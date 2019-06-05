@@ -20,6 +20,10 @@ const artworkSchema = new mongoose.Schema({
   date: Date,
   size: String,
   medium: String,
+  user:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'User'
+  }
 })
 
 
