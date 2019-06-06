@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/vsvala/Art_Club_back#readme",
   "dependencies": {
-    "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
@@ -32,6 +31,7 @@
     "mongoose-unique-validator": "^2.0.3"
   },
   "devDependencies": {
+    "bcrypt": "^3.0.0",
     "codecov": "^3.5.0",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.13.0",

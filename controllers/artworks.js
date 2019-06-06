@@ -1,6 +1,6 @@
 const artworksRouter = require('express').Router()
 const Artwork = require('../models/artwork')
-
+const User = require('../models/user')
 
 // artworksRouter.get('/', (req, res) => {
 //   res.send('<h1>Hello World!</h1>')
@@ -34,6 +34,9 @@ artworksRouter.get('/:id',async (req, res, next) => {
 artworksRouter.post('/',async (req, res, next) => {
   const body = req.body
 
+  const user = await User.findById(body.userId)
+  console.log('user', user)
+
   if (body.image === undefined) {
     return res.status(400).json({ error: 'image missing' })
   }
@@ -46,15 +49,21 @@ artworksRouter.post('/',async (req, res, next) => {
     year: body.year,
     size: body.size,
     medium:body.medium,
+    user: user._id,
   })
 
   try {
     const savedArtwork = await artwork.save()
+    user.artworks = user.artworks.concat(savedArtwork._id)
+    await user.save()
+
     res.json(savedArtwork.toJSON())
+
   } catch(exception) {
     next(exception)
   }
 })
+
 artworksRouter.put('/:id', (req, res, next) => {
   const body = req.body
 

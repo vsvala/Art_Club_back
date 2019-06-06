@@ -2,10 +2,11 @@ POST http://localhost:3001/api/artworks
 Content-Type: application/json
 
 {
-  "image": "dy.jpg",
-  "artist": "V. Svala",
-  "name": "Day",
+  "image": "kuva.jpg",
+  "artist": "Kissa",
+  "name": "Nainen",
   "year": 2017,
-  "size": "20x30cm",
-  "medium":"ink"
+  "size": "30x30cm",
+  "medium":"pastel",
+  "userId":"5cf94f1a65a6b76cfd2052f8"
 }
