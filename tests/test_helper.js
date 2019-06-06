@@ -8,8 +8,8 @@ const usersInDb = async () => {
 }
 
 module.exports = {
-  initialNotes,
-  nonExistingId,
-  notesInDb,
+  // initialArtworks,
+  // nonExistingId,
+  // notesInDb,
   usersInDb,
 }
