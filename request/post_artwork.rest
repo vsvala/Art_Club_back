@@ -1,5 +1,6 @@
 POST http://localhost:3001/api/artworks
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InR1dHRpIiwiaWQiOiI1ZDA5MWU1YzcwMmQ2YzJhOTAyZDFhZjkiLCJpYXQiOjE1NjA4ODE1NTV9.Q9iXF9pvpcNryDNEDqziRAVI6nZCVXT5WUxfQhUg5lw
 
 {
   "image": "kuva.jpg",

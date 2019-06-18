@@ -1,9 +1,9 @@
 POST http://localhost:3001/api/users
 Content-Type: application/json
 
-{   
-  "username": "uhasssaaa",
-  "name": "tossu",
-  "password": "pashord",
+{ "name": "Tylletö", 
+  "email": "t.jotain@gmail.com", 
+  "username": "tutti",
+  "password": "password",
   "role": "nonMember"
 }
