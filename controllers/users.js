@@ -34,8 +34,9 @@ usersRouter.post('/', async (req, res) => {
 
 
     const user = new User({
-      username: body.username,
       name: body.name,
+      email: body.email,
+      username: body.username,
       passwordHash,
       role:body.role
     })

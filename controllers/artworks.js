@@ -1,10 +1,21 @@
 const artworksRouter = require('express').Router()
 const Artwork = require('../models/artwork')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
 
 // artworksRouter.get('/', (req, res) => {
 //   res.send('<h1>Hello World!</h1>')
 // })
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+  return null
+}
+
 
 //gets all artworks
 artworksRouter.get('/', async(req, res) => {
@@ -33,26 +44,36 @@ artworksRouter.get('/:id',async (req, res, next) => {
 
 artworksRouter.post('/',async (req, res, next) => {
   const body = req.body
-
-  const user = await User.findById(body.userId)
-  console.log('user', user)
-
-  if (body.image === undefined) {
-    return res.status(400).json({ error: 'image missing' })
-  }
-  console.log('artwork', body)
-
-  const artwork = new Artwork({
-    image: body.image,
-    artist: body.artist,
-    name: body.name,
-    year: body.year,
-    size: body.size,
-    medium:body.medium,
-    user: user._id,
-  })
+  const token = getTokenFrom(req)
 
   try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+      return res.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+
+
+    //const user = await User.findById(body.userId)
+    console.log('user', user)
+
+    if (body.image === undefined) {
+      return res.status(400).json({ error: 'image missing' })
+    }
+    console.log('artwork', body)
+
+    const artwork = new Artwork({
+      image: body.image,
+      artist: body.artist,
+      name: body.name,
+      year: body.year,
+      size: body.size,
+      medium:body.medium,
+      user: user._id,
+    })
+
+
     const savedArtwork = await artwork.save()
     user.artworks = user.artworks.concat(savedArtwork._id)
     await user.save()
