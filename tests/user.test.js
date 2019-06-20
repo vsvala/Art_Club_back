@@ -1,4 +1,6 @@
 const User = require('../models/user')
+const helper = require('./test_helper')
+const api = require('../app')
 
 describe('when there is initially one user at db', async () => {
   beforeEach(async () => {
@@ -31,7 +33,7 @@ describe('when there is initially one user at db', async () => {
     expect(usernames).toContain(newUser.username)
   })
 
-test('creation fails with proper statuscode and message if username already taken', async () => {
+  test('creation fails with proper statuscode and message if username already taken', async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
