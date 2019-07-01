@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 
 //schema tells to mongoose how to save objects
 const artworkSchema = new mongoose.Schema({
-  image: String,
+  galleryImage:String,//{ type:String, required:true },
   artist: String,
   name: String,
   year: Number,
@@ -24,5 +24,7 @@ artworkSchema.set('toJSON', {
     delete returnedObject.__v
   }
 })
+const artwork = mongoose.model('Artwork', artworkSchema)
 
-module.exports = mongoose.model('Artwork', artworkSchema)
+module.exports = artwork
+//module.exports = mongoose.model('Artwork', artworkSchema)
