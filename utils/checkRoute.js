@@ -71,7 +71,7 @@ const checkAdmin = (req, res, next) => {
     if (!token) {
       return res.status(401).json({ error: 'token missing or invalid' })
     }
-
+    console.log('tokenrole', token.role)
     if (token.role !== 'admin') {
       return res.status(401).json({ error: 'not admin' })
     }

@@ -16,7 +16,7 @@ const userSchema =mongoose.Schema({
   artworks:[
     {
       type:mongoose.Schema.Types.ObjectId,
-      artworksref:'Artwork'
+      ref:'Artwork'
     }
   ],
 })

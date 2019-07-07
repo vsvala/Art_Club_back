@@ -40,12 +40,33 @@ fileFilter:fileFilter
 // })
 
 
+// //gets all artworks
+// artworksRouter.get('/', async(req, res) => {
+//   const artworks = await Artwork.find({})
+//   res.json(artworks.map(artwork => {
+//     return{
+//       image:artwork.galleryImage,
+//       artist: artwork.artist,
+//       name: artwork.name,
+//       year: artwork.name,
+//       size: artwork.size,
+//       medium: artwork.medium,
+//       user:artwork.user,
+//       request:{
+//         type:'GET',
+//         url:'http//localhost:3000/artworks/'+ artwork._id
+//         // artwork.toJSON()
+//       }
+//     }
+//   }))
+// })
+
 //gets all artworks
 artworksRouter.get('/', async(req, res) => {
   const artworks = await Artwork.find({})
+    .populate('user', { username: 1, name: 1 })
   res.json(artworks.map(artwork => artwork.toJSON()))
 })
-
 
 //gets single  artwork with specific id
 artworksRouter.get('/:id',async (req, res, next) => {
@@ -65,7 +86,7 @@ artworksRouter.get('/:id',async (req, res, next) => {
   // })
 })
 
-artworksRouter.post('/', upload.single('galleryImage'),(req, res, next) => { //async
+artworksRouter.post('/', upload.single('galleryImage'),async(req, res, next) => { //async
   console.log('reqfile', req.file)
   const body = req.body
   console.log('artworkbody', body.userId)
@@ -87,62 +108,70 @@ artworksRouter.post('/', upload.single('galleryImage'),(req, res, next) => { //a
  */
   //
   //tää pitää kai parsia
-  //const user = User.findById(body.userId)// await
-  //console.log('user_____________________________________________', user)
+  try {
+    const user = await User.findById(body.userId)// await
+    //console.log('user_____________________________________________', user)
 
-  /*   if (body.artist === undefined) {
+    /*   if (body.artist === undefined) {
     return res.status(400).json({ error: 'artist missing' })
   } */
-  //console.log('artwork_______________________________________________________________________________________________', body)
+    //console.log('artwork_______________________________________________________________________________________________', body)
 
-  const artwork = new Artwork({
-    galleryImage: req.file.path,
-    artist: req.body.artist,
-    name: req.body.name,
-    year: req.body.year,
-    size: req.body.size,
-    medium:req.body.medium,
-    user:req.body.userId
+    const artwork = new Artwork({
+      galleryImage: req.file.path,
+      artist: req.body.artist,
+      name: req.body.name,
+      year: req.body.year,
+      size: req.body.size,
+      medium:req.body.medium,
+      user:req.body.userId
     //user: user._id,
-  })
-  artwork.save()
-  // const savedArtwork = artwork.save()//await
-  //user.artworks = user.artworks.concat(savedArtwork._id)
-  //user.save() // await
-    .then((result) => {
-      console.log(result)
-      res.status(200).json({
-        succes:true,
-        document:result
-        //res.json(savedArtwork.toJSON())
-
-        // } catch(exception) {
-        //   next(exception)
-        // }
-      })
-        .catch((err) => next(err))
-
     })
-})
-artworksRouter.put('/:id', (req, res, next) => {
-  const body = req.body
+    //artwork.save()
+    const savedArtwork =await artwork.save()//await
+    console.log('savedartwolrid',savedArtwork)
 
-  const artwork = {
-    image: body.image,
-    artist: body.artist,
-    name: body.name,
-    year: body.year,
-    size: body.size,
-    medium:body.medium,
+    //savedArtwork.id
+    user.artworks = await user.artworks.concat(savedArtwork)
+    await user.save() // await
 
+    //  .then((result) => {
+    // console.log(result)
+    res.status(200).json(savedArtwork)
+    //({
+    // succes:true,
+    // document:result
+    //res.json(savedArtwork.toJSON())
+
+    // } catch(exception) {
+    //   next(exception)
+    // }
+    // })
+    //  .catch((err) => next(err))
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).json({ error: 'bad req' })
   }
-
-  Artwork.findByIdAndUpdate(req.params.id, artwork, { new: true })
-    .then(updatedArtwork => {
-      res.json(updatedArtwork.toJSON())
-    })
-    .catch(error => next(error))
 })
+//})
+// artworksRouter.put('/:id', (req, res, next) => {
+//   const body = req.body
+
+//   const artwork = {
+//     image: body.image,
+//     artist: body.artist,
+//     name: body.name,
+//     year: body.year,
+//     size: body.size,
+//     medium:body.medium,
+//   }
+
+//   Artwork.findByIdAndUpdate(req.params.id, artwork, { new: true })
+//     .then(updatedArtwork => {
+//       res.json(updatedArtwork.toJSON())
+//     })
+//     .catch(error => next(error))
+// })
 
 
 artworksRouter.delete('/:id', async (req, res, next) => {
