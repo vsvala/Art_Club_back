@@ -9,7 +9,7 @@ const User = require('../models/user')
 //multer saves image to folder
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null,'./uploads/')
+    cb(null,'./uploads/')//./public
     console.log('storage')
   },
   filename:function(req, file, cb) {

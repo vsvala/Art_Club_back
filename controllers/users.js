@@ -5,7 +5,7 @@ const User = require('../models/user')
 const { checkAdmin, checkLogin } = require('../utils/checkRoute')
 
 
-usersRouter.get('/',checkAdmin, async (req, res) => {
+usersRouter.get('/',checkLogin, async (req, res) => {
   try {
     const users = await User.
       find({})
@@ -20,12 +20,13 @@ usersRouter.get('/',checkAdmin, async (req, res) => {
 
 
 //gets single  user with specific id
-usersRouter.get('/:id',checkLogin, async (req, res, next) => {
-  try{
+usersRouter.get('/admin/:id',checkLogin, async (req, res, next) => {
+  try {
     const user = await User.findById(req.params.id)
+      .populate('artworks')
     if(user){
-      res.json(user.toJSON())
-    }else{
+      res.json(user.toJSON())}
+    else{
       res.status(404).end()
     }
   }catch(exception){
