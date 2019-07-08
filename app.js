@@ -34,7 +34,7 @@ app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
 app.use('/uploads',express.static('uploads'))//create a static path reference to folder
-
+app.use('/public/uploads',express.static('uploads'))
 app.use(cors())
 
 app.use('/api/users', usersRouter)
