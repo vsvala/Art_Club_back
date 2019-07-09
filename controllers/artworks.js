@@ -86,7 +86,7 @@ artworksRouter.get('/:id',async (req, res, next) => {
   // })
 })
 
-artworksRouter.post('/', upload.single('galleryImage'),async(req, res, next) => { //async
+artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => { //async
   console.log('reqfile', req.file)
   const body = req.body
   console.log('artworkbody', body.userId)
