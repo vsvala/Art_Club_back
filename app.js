@@ -17,6 +17,7 @@ const tokenCheckRouter = require('./controllers/tokenCheck')
 
 
 // connecting to db throught config file
+
 console.log('commecting to', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
@@ -33,6 +34,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
+app.use(express.static('build'))
 app.use('/uploads',express.static('uploads'))//create a static path reference to folder
 app.use('/public/uploads',express.static('uploads'))
 app.use(cors())
