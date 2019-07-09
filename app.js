@@ -8,19 +8,17 @@ const mongoose = require('mongoose')
 //Routrers
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
-const imageRouter = require('./controllers/images')
+//const imageRouter = require('./controllers/images')
 const artworksRouter = require('./controllers/artworks')
 const middleware = require('./utils/middleware.js')
 const tokenCheckRouter = require('./controllers/tokenCheck')
 
-//var multer = require('multer')
-
 
 // connecting to db throught config file
-
 console.log('commecting to', config.MONGODB_URI)
-//'mongodb+srv://artclub:V1ku77artclub@cluster0-zjipd.mongodb.net/artwork?retryWrites=true&w=majority'
-mongoose.connect(config.MONGODB_URI,
+
+//mongoose.connect(config.MONGODB_URI,
+mongoose.connect('mongodb+srv://artclub:V1ku77artclub@cluster0-zjipd.mongodb.net/artwork?retryWrites=true&w=majority',
   { useNewUrlParser: true })
   .then(() => {
     console.log('connected to MongoDB')
@@ -31,8 +29,7 @@ mongoose.connect(config.MONGODB_URI,
 
 mongoose.set('useCreateIndex', true)
 
-// Middleware
-
+// Middlewares
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
@@ -45,8 +42,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/artworks', artworksRouter)
 app.use('/api/login', loginRouter)
 app.use('api/tokenCheck', tokenCheckRouter)
-app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
-//app.use(multer({ dest: 'public/uploads/',rename: function (fieldname, filename) {return filename }, }).any()) //middleware Multer to upload the photo on the server side.
+//app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
