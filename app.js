@@ -17,8 +17,8 @@ const tokenCheckRouter = require('./controllers/tokenCheck')
 // connecting to db throught config file
 console.log('commecting to', config.MONGODB_URI)
 
-//mongoose.connect(config.MONGODB_URI,
-mongoose.connect('mongodb+srv://artclub:V1ku77artclub@cluster0-zjipd.mongodb.net/artwork?retryWrites=true&w=majority',
+mongoose.connect(config.MONGODB_URI,
+//mongoose.connect('mongodb+srv://artclub:V1ku77artclub@cluster0-zjipd.mongodb.net/artwork?retryWrites=true&w=majority',
   { useNewUrlParser: true })
   .then(() => {
     console.log('connected to MongoDB')
