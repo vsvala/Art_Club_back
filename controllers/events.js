@@ -98,7 +98,7 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
       startTime: req.body.startTime,
       endTime: req.body.endTime,
       description:req.body.description,
-      user:req.body.userId
+      user:user
     })
     const savedEvent =await event.save()
     console.log('savedEvent',savedEvent)
