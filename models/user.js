@@ -3,23 +3,28 @@ const uniqueValidator = require('mongoose-unique-validator')
 
 
 const userSchema =mongoose.Schema({
-  //username:String,
   name:String,
   email:String,
   username:
   {
     type:String,
-    unique:true
+    unique:true,
+    required:true
   },
-  passwordHash: String,
+  passwordHash:
+  { type:String,
+    required:true
+  },
   role:String,
+
   artworks:[
     {
       type:mongoose.Schema.Types.ObjectId,
       ref:'Artwork'
     }
   ],
-})
+}
+)
 userSchema.plugin(uniqueValidator)
 
 // userSchema.statics.format = (user) => {
