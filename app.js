@@ -8,7 +8,7 @@ const mongoose = require('mongoose')
 //Routrers
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
-//const imageRouter = require('./controllers/images')
+const eventsRouter = require('./controllers/events')
 const artworksRouter = require('./controllers/artworks')
 const middleware = require('./utils/middleware.js')
 const tokenCheckRouter = require('./controllers/tokenCheck')
@@ -38,6 +38,7 @@ app.use(cors())
 
 app.use('/api/users', usersRouter)
 app.use('/api/artworks', artworksRouter)
+app.use('/api/events', eventsRouter)
 app.use('/api/login', loginRouter)
 app.use('api/tokenCheck', tokenCheckRouter)
 //app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
