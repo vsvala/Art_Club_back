@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const User = require('../models/user')
 //const jwt = require('jsonwebtoken')
-const { checkAdmin, checkLogin } = require('../utils/checkRoute')
+const { checkAdmin, checkLogin, authenticateToken } = require('../utils/checkRoute') //checkUser,
 
 
 usersRouter.get('/',checkLogin, async (req, res) => {
@@ -14,7 +14,20 @@ usersRouter.get('/',checkLogin, async (req, res) => {
     //res.status(200).json(users)
   } catch (exception) {
     console.log(exception.message)
-    res.status(400).json({ error: 'Could not get studentlist from db' })
+    res.status(400).json({ error: 'Could not get userList from db' })
+  }
+})
+
+usersRouter.get('/artists',async (req, res) => {
+  try {
+    const users = await User.
+      find({})
+      .populate('artworks', { artist: 1, name: 1, year: 1, size: 1, medium: 1, galleryImage: 1  })
+    res.json(users.map(u => u.toJSON()))
+    //res.status(200).json(users)
+  } catch (exception) {
+    console.log(exception.message)
+    res.status(400).json({ error: 'Could not get artitsList from db' })
   }
 })
 
@@ -156,6 +169,38 @@ usersRouter.put('/admin', checkAdmin, async (req, res) => {
   } catch (exception) {
     console.log(exception)
     res.status(500).json({ error: 'did not update user, something went wrong...' })
+  }
+})
+
+
+//Update password
+usersRouter.put('/password', checkLogin, async (req, res) => {
+  console.log('tää')
+  console.log('body',req.body)
+
+  try {
+    const body = req.body
+    const token = authenticateToken(req)
+    console.log('token', token)
+
+
+    const user = await User.findById(token.id)
+
+    if( await bcrypt.compare(body.oldPassword, user.passwordHash)) {
+
+      const saltRounds = 10
+      const newPasswordHash = await bcrypt.hash(body.newPassword, saltRounds)
+      await user.update({ passwordHash: newPasswordHash })
+      res.status(200).end()
+
+    } else {
+      console.log('old password does not match')
+      res.status(400).json({ error: 'old password does not match' })
+    }
+
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).json({ error: 'bad req' })
   }
 })
 
