@@ -8,8 +8,7 @@ const userSchema =mongoose.Schema({
   username:
   {
     type:String,
-    unique:true,
-    required:true
+    unique:true
   },
   passwordHash:
   { type:String,

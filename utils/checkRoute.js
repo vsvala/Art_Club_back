@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+//const config = require('./config')
 
 //Gets the encoded token of the logged user
 const getTokenFrom = request => {
