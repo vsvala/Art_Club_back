@@ -93,10 +93,8 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
       eventImage: req.file.path,
       title: req.body.title,
       place: req.body.place,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-      startTime: req.body.startTime,
-      endTime: req.body.endTime,
+      start: req.body.start,
+      end: req.body.end,
       description:req.body.description,
       user:user
     })

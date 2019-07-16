@@ -3,14 +3,11 @@ const mongoose = require('mongoose')
 
 //schema tells to mongoose how to save objects
 const eventSchema = new mongoose.Schema({
-  eventImage:String,//
+  eventImage:String,
   title:{ type:String, required:true },
-  //String,
   place: String,
-  startDate: Number,
-  endDate: String,
-  startTime: String,
-  endTime: String,
+  start: String,
+  end: String,
   description: String,
   user:{
     type:mongoose.Schema.Types.ObjectId,
