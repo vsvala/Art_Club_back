@@ -42,7 +42,7 @@ eventsRouter.get('/', async(req, res) => {
 })
 
 
-//gets single  artwork with specific id
+/* //gets single  event with specific id
 eventsRouter.get('/:id',async (req, res, next) => {
   try{
     const event = await Event.findById(req.params.id)
@@ -59,7 +59,7 @@ eventsRouter.get('/:id',async (req, res, next) => {
   //   res.status(400).send({ error: 'malformatted id' })
   // })
 })
-
+ */
 
 eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
   console.log('reqfile', req.file)

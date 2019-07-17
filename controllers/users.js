@@ -50,9 +50,20 @@ usersRouter.get('/admin/:id',checkLogin, async (req, res, next) => {
   //   res.status(400).send({ error: 'malformatted id' })
   // })
 })
-
-
-
+//gets single  user with specific id
+usersRouter.get('/artist/:id', async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('artworks')
+    if(user){
+      res.json(user.toJSON())}
+    else{
+      res.status(404).end()
+    }
+  }catch(exception){
+    next(exception)
+  }
+})
 
 usersRouter.post('/', async (req, res) => {
   try {
