@@ -16,6 +16,8 @@ const userSchema =mongoose.Schema({
   },
   role:String,
 
+  intro:String,
+
   artworks:[
     {
       type:mongoose.Schema.Types.ObjectId,

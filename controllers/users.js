@@ -65,6 +65,7 @@ usersRouter.get('/artist/:id', async (req, res, next) => {
   }
 })
 
+//Creates user when registering
 usersRouter.post('/', async (req, res) => {
   try {
     const body = req.body
@@ -89,7 +90,8 @@ usersRouter.post('/', async (req, res) => {
       email: body.email,
       username: body.username,
       passwordHash,
-      role:body.role
+      role:body.role,
+      intro:'No introduction text yet'
     })
     console.log('user',  user)
     const savedUser = await user.save()
@@ -114,17 +116,29 @@ usersRouter.delete('/:id', checkAdmin, async (req, res, next) => {
 
 
 
-usersRouter.get('/:id', (req, res, next) => {
-  User.findById(req.params.id)
-    .then(user => {
-      if (user) {
-        res.json(user.toJSON())
-      } else {
-        res.status(404).end()
-      }
-    })
-    .catch(error => next(error))
+usersRouter.get('/:id',async(req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('artworks')
+    if(user){
+      res.json(user.toJSON())}
+    else{
+      res.status(404).end()
+    }
+  }catch(exception){
+    next(exception)
+  }
 })
+//   User.findById(req.params.id)
+//     .then(user => {
+//       if (user) {
+//         res.json(user.toJSON())
+//       } else {
+//         res.status(404).end()
+//       }
+//     })
+//     .catch(error => next(error))
+// })
 //funktion next with parametr, moves error to errrorhandlingmiddleware
 
 
@@ -179,7 +193,7 @@ usersRouter.put('/admin', checkAdmin, async (req, res) => {
 
   } catch (exception) {
     console.log(exception)
-    res.status(500).json({ error: 'did not update user, something went wrong...' })
+    res.status(500).json({ error: 'did not update role, something went wrong...' })
   }
 })
 
@@ -212,6 +226,54 @@ usersRouter.put('/password', checkLogin, async (req, res) => {
   } catch (error) {
     console.log(error.message)
     res.status(400).json({ error: 'bad req' })
+  }
+})
+
+//Updates user info
+usersRouter.put('/intro/:id', checkLogin, async(req, res) => {
+  const body = req.body
+  console.log('body', body)
+
+  try {
+    let updatedUser= await User.findById(req.params.id)
+    console.log('uptadedUser', updatedUser)
+
+    await updatedUser.update(
+      { intro:req.body.intro
+      })
+    res.json(updatedUser.toJSON())
+    console.log('updated', updatedUser)
+
+  } catch (exception) {
+    console.log(exception)
+    res.status(500).json({ error: 'did not update introduction, something went wrong...' })
+  }
+})
+
+
+
+
+//Updates user info
+usersRouter.put('/info', checkLogin, async(req, res) => {
+  const body = req.body
+  console.log('body', body)
+  console.log('bodyId', body.id)
+
+  try {
+    let updatedUser= await User.findById(body.id)
+    console.log('uptadedUser', updatedUser)
+
+    await updatedUser.update(
+      { name:req.body.name,
+        email:req.body.email,
+        username:req.body.username
+      })
+    res.json(updatedUser.toJSON())
+    console.log('updated', updatedUser)
+
+  } catch (exception) {
+    console.log(exception)
+    res.status(500).json({ error: 'did not update information, something went wrong...' })
   }
 })
 

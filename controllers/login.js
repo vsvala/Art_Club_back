@@ -30,7 +30,7 @@ loginRouter.post('/', async (req, res) => {
 
     res
       .status(200)
-      .send({ token, username: user.username, name: user.name, role: user.role, id:user.id })
+      .send({ token, username: user.username, name: user.name, role: user.role, id:user.id, email:user.email, intro:user.intro })
   }
   catch (error) {
     console.log(error.message)
