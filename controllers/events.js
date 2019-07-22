@@ -43,24 +43,6 @@ eventsRouter.get('/', async(req, res) => {
 })
 
 
-/* //gets single  event with specific id
-eventsRouter.get('/:id',async (req, res, next) => {
-  try{
-    const event = await Event.findById(req.params.id)
-    if(event){
-      res.json(event.toJSON())
-    }else{
-      res.status(404).end()
-    }
-  }catch(exception){
-    next(exception)
-  }
-  // (error => {
-  //   console.log(error)
-  //   res.status(400).send({ error: 'malformatted id' })
-  // })
-})
- */
 
 eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
   console.log('reqfile', req.file)
@@ -118,16 +100,17 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
 
 eventsRouter.delete('/:id', async (req, res, next) => {
   try {
-    await Event.findByIdAndRemove(req.params.id)
-    // const fs = require('fs')
-    // const filePath = 'testFile.txt'
-    // fs.access(filePath, error => {
-    //   if (!error) {
-    //     fs.unlinkSync(filePath)
-    //   } else {
-    //     console.log(error)
-    //   }
-    // })
+    const event = await Event.findByIdAndRemove(req.params.id)
+    console.log(' artwork.eventImage', event.eventImage)
+    const fs = require('fs')
+    const filePath = './'+ event.eventImage
+    fs.access(filePath, error => {
+      if (!error) {
+        fs.unlinkSync(filePath)
+      } else {
+        console.log(error)
+      }
+    })
     res.status(204).end()
   } catch (exception) {
     next(exception)
