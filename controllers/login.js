@@ -2,13 +2,19 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const User = require('../models/user')
-
+const config = require('../utils/config')
 
 
 loginRouter.post('/', async (req, res) => {
   const body = req.body
 
   try {
+
+    if (!req.body.username || !req.body.password) {
+      // username or password field undefined
+      return res.status(400).json({ error: 'missing username or password' })
+    }
+
     const user = await User.findOne({ username: body.username })
     const passwordCorrect = user === null
       ? false
@@ -25,8 +31,8 @@ loginRouter.post('/', async (req, res) => {
       id: user._id,
       role:user.role
     }
-
-    const token = jwt.sign(userForToken, process.env.SECRET)
+    const token = jwt.sign({ userForToken }, config.secret, { expiresIn: '10h' })
+    // const token = jwt.sign(userForToken, process.env.SECRET)
 
     res
       .status(200)
