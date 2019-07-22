@@ -119,20 +119,20 @@ artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => {
 
 
 // deletes artwork url and image file from uploads folder
-artworksRouter.delete('/:id', async (req, res, next) => {
+artworksRouter.delete('/:id', async (req, res, next) => {// checkLogin,
   try {
 
-    const decodedToken = authenticateToken(req)
-    const user = await User.findById(decodedToken.id)
+    //const decodedToken = authenticateToken(req)
+    // const user = await User.findById(decodedToken.id)
 
-    await Artwork.User.update(
-      { 'artwork': req.params.id },
-      { '$pull': { 'user':user.id } },
-      function (err, res){
-        if (err) throw err
-        res.json(res)
-      }
-    )
+    // await Artwork.User.update(
+    //   { 'artwork': req.params.id },
+    //   { '$pull': { 'user':user.id } },
+    //   function (err, res){
+    //     if (err) throw err
+    //     res.json(res)
+    //   }
+    // )
     // await User.update({ _id: user.id }, { '$pull': { 'artworks': {'ObjectId': 'req.params.id' } } } )
     const artwork = await Artwork.findByIdAndRemove(req.params.id)
 

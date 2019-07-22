@@ -4,7 +4,7 @@ const Event = require('../models/event')
 const User = require('../models/user')
 //const jwt = require('jsonwebtoken')
 //const { authenticateToken } = require('../utils/checkRoute')
-const {  checkLogin } = require('../utils/middleware/checkRoute')
+const {  checkLogin } = require('../utils/checkRoute')
 
 
 //multer saves image to folder
@@ -104,7 +104,7 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
 })
 
 
-eventsRouter.delete('/:id', async (req, res, next) => {
+eventsRouter.delete('/:id', checkLogin, async (req, res, next) => {
   try {
     const event = await Event.findByIdAndRemove(req.params.id)
     console.log(' artwork.eventImage', event.eventImage)

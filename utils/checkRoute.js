@@ -17,7 +17,9 @@ const authenticateToken = (req) => {
   const decodedToken = jwt.verify(token, process.env.SECRET)
 
   if (!token || !decodedToken.id) {
+    console.log('authent not working')
     return req.status(401).json({ error: 'token missing or invalid' })
+
     // return null
   }
   console.log('check returntoken')
@@ -51,6 +53,7 @@ const checkUser = (req, res, next) => {
 const checkLogin = (req, res, next) => {
   try {
     const token = authenticateToken(req)
+    console.log('token from checklogin is ok', token)
 
     if (!token) {
       console.log('checklogin tokenmissing')
@@ -60,7 +63,7 @@ const checkLogin = (req, res, next) => {
     next()
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
-      console.log('checklogin terror')
+      console.log('checklogin JsonWebTokenError ')
       res.status(401).json({ error: error.message })
     } else {
       console.log('checklogin terror')
