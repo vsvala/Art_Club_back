@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    console.log('authorizsubstring7',authorization.substring(7) )
     return authorization.substring(7)
   }
   return null
@@ -19,6 +20,7 @@ const authenticateToken = (req) => {
     return req.status(401).json({ error: 'token missing or invalid' })
     // return null
   }
+  console.log('check returntoken')
   return decodedToken
 }
 
@@ -51,14 +53,17 @@ const checkLogin = (req, res, next) => {
     const token = authenticateToken(req)
 
     if (!token) {
+      console.log('checklogin tokenmissing')
       return res.status(401).json({ error: 'token missing or invalid' })
     }
 
     next()
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
+      console.log('checklogin terror')
       res.status(401).json({ error: error.message })
     } else {
+      console.log('checklogin terror')
       res.status(500).json({ error: error })
     }
   }

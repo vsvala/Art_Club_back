@@ -40,7 +40,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/artworks', artworksRouter)
 app.use('/api/events', eventsRouter)
 app.use('/api/login', loginRouter)
-app.use('api/tokenCheck', tokenCheckRouter)
+app.use('/api/tokenCheck', tokenCheckRouter)
 //app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
 
 app.use(middleware.unknownEndpoint)

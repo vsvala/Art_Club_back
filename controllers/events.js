@@ -4,6 +4,7 @@ const Event = require('../models/event')
 const User = require('../models/user')
 //const jwt = require('jsonwebtoken')
 //const { authenticateToken } = require('../utils/checkRoute')
+const {  checkLogin } = require('../utils/middleware/checkRoute')
 
 
 //multer saves image to folder
@@ -36,12 +37,17 @@ fileFilter:fileFilter
 
 
 //gets all events
-eventsRouter.get('/', async(req, res) => {
-  const events = await Event.find({})
-    .populate('user', { username: 1, name: 1 })
-  res.json(events.map(event => event.toJSON()))
-})
+eventsRouter.get('/',checkLogin, async(req, res) => {
+  try {
+    const events = await Event.find({})
+      .populate('user', { username: 1, name: 1 })
+    res.json(events.map(event => event.toJSON()))
 
+  } catch (exception) {
+    console.log(exception.message)
+    res.status(400).json({ error: 'Could not get eventList from db' })
+  }
+})
 
 
 eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
