@@ -19,11 +19,12 @@ const storage = multer.diskStorage({
 })
 //rejects storing a file if not image
 const fileFilter = (req, file, cb) => {
-  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/pdf') {
+
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/pdf'  || file.mimetype === 'image/gif') {
     cb(null,true)
     console.log('mimetype true')
   }else{
-    console.log('false')
+    console.log('not supportet format')
     cb(null,false)
   }
 }
@@ -118,6 +119,15 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
 eventsRouter.delete('/:id', async (req, res, next) => {
   try {
     await Event.findByIdAndRemove(req.params.id)
+    // const fs = require('fs')
+    // const filePath = 'testFile.txt'
+    // fs.access(filePath, error => {
+    //   if (!error) {
+    //     fs.unlinkSync(filePath)
+    //   } else {
+    //     console.log(error)
+    //   }
+    // })
     res.status(204).end()
   } catch (exception) {
     next(exception)

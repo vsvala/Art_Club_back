@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 })
 const fileFilter = (req, file, cb) => {
 //     //rejects storing a file
-  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/pdf') {
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/pdf' || file.mimetype === 'image/gif') {
     cb(null,true)
     console.log('mimetype true')
   }else{
@@ -34,10 +34,6 @@ const upload = multer({ storage: storage, limits:{
 fileFilter:fileFilter
 })
 
-
-// artworksRouter.get('/', (req, res) => {
-//   res.send('<h1>Hello World!</h1>')
-// })
 
 
 // //gets all artworks
@@ -176,7 +172,17 @@ artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => { //as
 
 artworksRouter.delete('/:id', async (req, res, next) => {
   try {
-    await Artwork.findByIdAndRemove(req.params.id)
+    const artwork = await Artwork.findByIdAndRemove(req.params.id)
+    console.log(' artwork.galleryImage', artwork.galleryImage)
+    const fs = require('fs')
+    const filePath = './'+ artwork.galleryImage
+    fs.access(filePath, error => {
+      if (!error) {
+        fs.unlinkSync(filePath)
+      } else {
+        console.log(error)
+      }
+    })
     res.status(204).end()
   } catch (exception) {
     next(exception)
@@ -184,15 +190,3 @@ artworksRouter.delete('/:id', async (req, res, next) => {
 })
 
 module.exports = artworksRouter
-
-// const artwork = new Artwork({
-//   image: 'sleebybear.jpg',
-//   artist: 'Virva Svala',
-//   name: 'Sleepy bear',
-//   year: 2017,
-//   size: '20x30cm',
-//   medium:'aquarelle',
-// })
-// artwork.save().then(savedArtwork => {
-//   res.json(savedArtwork.toJSON())
-// })
