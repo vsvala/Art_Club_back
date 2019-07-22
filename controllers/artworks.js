@@ -46,7 +46,23 @@ artworksRouter.get('/', async(req, res) => {
   res.json(artworks.map(artwork => artwork.toJSON()))
 })
 
-
+//gets single artwork with specific id
+artworksRouter.get('/:id', async (req, res, next) => {
+  try{
+    const artwork = await Artwork.findById(req.params.id)
+    if(artwork){
+      res.json(artwork.toJSON())
+    }else{
+      res.status(404).end()
+    }
+  }catch(exception){
+    next(exception)
+  }
+  // (error => {
+  //   console.log(error)
+  //   res.status(400).send({ error: 'malformatted id' })
+  // })
+})
 
 // creating artwork
 artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => {
