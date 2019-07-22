@@ -3,7 +3,7 @@ const multer = require('multer')
 const Artwork = require('../models/artwork')
 const User = require('../models/user')
 //const jwt = require('jsonwebtoken')
-const { authenticateToken } = require('../utils/checkRoute')
+//const { authenticateToken } = require('../utils/checkRoute')
 
 
 //TODO authentication and error cleaning
