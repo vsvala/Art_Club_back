@@ -2,11 +2,7 @@ const artworksRouter = require('express').Router()
 const multer = require('multer')
 const Artwork = require('../models/artwork')
 const User = require('../models/user')
-//const jwt = require('jsonwebtoken')
-//const { authenticateToken } = require('../utils/checkRoute')
-
-
-//TODO authentication and error cleaning
+const { checkLogin } = require('../utils/checkRoute')
 
 
 //multer saves image to folder
@@ -21,7 +17,7 @@ const storage = multer.diskStorage({
   }
 })
 const fileFilter = (req, file, cb) => {
-//     //rejects storing a file
+  //rejects storing a nonpicture file
   if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/pdf' || file.mimetype === 'image/gif') {
     cb(null,true)
     console.log('mimetype true')
@@ -30,7 +26,6 @@ const fileFilter = (req, file, cb) => {
     cb(null,false)
   }
 }
-
 const upload = multer({ storage: storage, limits:{
   fileSize:1024*1024*5
 },
@@ -40,61 +35,44 @@ fileFilter:fileFilter
 
 
 // gets all artworks and populates user details
-artworksRouter.get('/', async(req, res) => {
-  const artworks = await Artwork.find({})
-    .populate('user', { username: 1, name: 1 })
-  res.json(artworks.map(artwork => artwork.toJSON()))
+artworksRouter.get('/', async(req, res, next) => {
+  try{
+    const artworks = await Artwork.find({})
+      .populate('user', { username: 1, name: 1 })
+    res.status(200).json(artworks.map(artwork => artwork.toJSON()))  }
+  catch(exception) {
+    next(exception)
+  }
 })
+
 
 //gets single artwork with specific id
 artworksRouter.get('/:id', async (req, res, next) => {
   try{
     const artwork = await Artwork.findById(req.params.id)
     if(artwork){
-      res.json(artwork.toJSON())
+      res.starus(200).json(artwork.toJSON())
     }else{
       res.status(404).end()
     }
   }catch(exception){
     next(exception)
   }
-  // (error => {
-  //   console.log(error)
-  //   res.status(400).send({ error: 'malformatted id' })
-  // })
 })
 
 // creating artwork
-artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => {
-  console.log('reqfile', req.file)
+artworksRouter.post('/', checkLogin, upload.single('galleryImage'), async(req, res) => {
+  //console.log('reqfile', req.file)
   const body = req.body
-  console.log('artworkbody', body.userId)
+  // console.log('artworkbody', body.userId)
+  // console.log('routerista',body.config)
+  // console.log('routerista headers',req.headers)
+  // console.log('routeristadata',req.file.path)
+  //const decodedToken = authenticateToken(req)
+  //const user =  User.findById(decodedToken.id)
 
-  //console.log('routerista',body.config)
-  console.log('routerista headers',req.headers)
-  console.log('routeristadata',req.file.path)
-
-  //const token = getTokenFrom(req)
-  // try {
-  //   const decodedToken = jwt.verify(token, process.env.SECRET)
-  //   if (!token || !decodedToken.id) {
-  //     return res.status(401).json({ error: 'token missing or invalid' })
-  //
-
-  /*   AUTORISOINTI
-  const decodedToken = authenticateToken(req)
-  const user =  User.findById(decodedToken.id)//await
- */
-  //
-  //tää pitää kai parsia
   try {
-    const user = await User.findById(body.userId)// await
-    //console.log('user_____________________________________________', user)
-
-    /*   if (body.artist === undefined) {
-    return res.status(400).json({ error: 'artist missing' })
-  } */
-    //console.log('artwork_______________________________________________________________________________________________', body)
+    const user = await User.findById(body.userId)
 
     const artwork = new Artwork({
       galleryImage: req.file.path,
@@ -104,29 +82,16 @@ artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => {
       size: req.body.size,
       medium:req.body.medium,
       user:req.body.userId
-    //user: user._id,
+      //user: user._id,
     })
-    //artwork.save()
-    const savedArtwork =await artwork.save()//await
+    const savedArtwork =await artwork.save()
     console.log('savedartwolrid',savedArtwork)
-
+    //TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOhuom id vai artwork
     //savedArtwork.id
-    user.artworks = await user.artworks.concat(savedArtwork)
-    await user.save() // await
-
-    //  .then((result) => {
-    // console.log(result)
+    user.artworks = await user.artworks.concat(savedArtwork.id)
+    await user.save()
     res.status(200).json(savedArtwork)
-    //({
-    // succes:true,
-    // document:result
-    //res.json(savedArtwork.toJSON())
 
-    // } catch(exception) {
-    //   next(exception)
-    // }
-    // })
-    //  .catch((err) => next(err))
   } catch (error) {
     console.log(error.message)
     res.status(400).json({ error: 'bad req' })
@@ -135,13 +100,16 @@ artworksRouter.post('/', upload.single('galleryImage'),async(req, res) => {
 
 
 // deletes artwork url and image file from uploads folder
-artworksRouter.delete('/:id', async (req, res, next) => {// checkLogin,
+artworksRouter.delete('/:id',checkLogin, async (req, res, next) => {
   try {
 
     //const decodedToken = authenticateToken(req)
+    //console.log('decoderdT',decodedToken)
     // const user = await User.findById(decodedToken.id)
+    // console.log('user',user)
 
-    // await Artwork.User.update(
+    //filter away artwork from users artworkList
+    //await Artwork.User.update(
     //   { 'artwork': req.params.id },
     //   { '$pull': { 'user':user.id } },
     //   function (err, res){
@@ -163,7 +131,7 @@ artworksRouter.delete('/:id', async (req, res, next) => {// checkLogin,
         console.log(error)
       }
     })
-    res.status(204).end()
+    res.status(204).end() //No Content success
   } catch (exception) {
     next(exception)
   }
