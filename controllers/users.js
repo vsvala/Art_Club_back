@@ -179,7 +179,7 @@ usersRouter.put('/intro/:id', checkUser, async(req, res) => {
 
 
 //Updates user information
-usersRouter.put('/info', checkUser, async(req, res) => {
+usersRouter.put('/info/:id', checkUser, async(req, res) => {
   const body = req.body
   //console.log('body', body)
   console.log('bodyId', body.id)
