@@ -51,7 +51,7 @@ artworksRouter.get('/:id', async (req, res, next) => {
   try{
     const artwork = await Artwork.findById(req.params.id)
     if(artwork){
-      res.starus(200).json(artwork.toJSON())
+      res.status(200).json(artwork.toJSON())
     }else{
       res.status(404).end()
     }
