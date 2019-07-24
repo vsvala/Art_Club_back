@@ -11,18 +11,23 @@ const loginRouter = require('./controllers/login')
 const eventsRouter = require('./controllers/events')
 const artworksRouter = require('./controllers/artworks')
 const middleware = require('./utils/middleware.js')
+const logger = require('./utils/logger')
 const tokenCheckRouter = require('./controllers/tokenCheck')
 
 
+logger.info('connecting to', config.MONGODB_URI)
+
 // connecting to db throught config file
-console.log('commecting to', config.MONGODB_URI)
+//console.log('commecting to', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .then(() => {
-    console.log('connected to MongoDB')
+    //console.log('connected to MongoDB')
+    logger.info('connected to MongoDB')
   })
   .catch((error) => {
-    console.log('error connection to MongoDB:', error.message)
+    //console.log('error connection to MongoDB:', error.message)
+    logger.error('error connection to MongoDB:', error.message)
   })
 
 mongoose.set('useCreateIndex', true)

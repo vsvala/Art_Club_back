@@ -2,9 +2,8 @@ const eventsRouter = require('express').Router()
 const multer = require('multer')
 const Event = require('../models/event')
 const User = require('../models/user')
-//const jwt = require('jsonwebtoken')
 //const { authenticateToken } = require('../utils/checkRoute')
-const {  checkLogin } = require('../utils/checkRoute')
+const {  checkLogin, checkAdmin } = require('../utils/checkRoute')
 
 
 //multer saves image to folder
@@ -49,34 +48,21 @@ eventsRouter.get('/',checkLogin, async(req, res) => {
   }
 })
 
-
-eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
+//posting events for admin
+eventsRouter.post('/', upload.single('eventImage'),checkAdmin, async(req, res) => {
   console.log('reqfile', req.file)
   const body = req.body
   console.log('eventbody', body.userId)
 
-  //console.log('routerista',body.config)
+  console.log('routerista',body.config)
   console.log('routerista headers',req.headers)
   console.log('routeristadata',req.file.path)
-
-  //const token = getTokenFrom(req)
-  // try {
-  //   const decodedToken = jwt.verify(token, process.env.SECRET)
-  //   if (!token || !decodedToken.id) {
-  //     return res.status(401).json({ error: 'token missing or invalid' })
-  //
-
   /*   AUTORISOINTI
   const decodedToken = authenticateToken(req)
   const user =  User.findById(decodedToken.id)//await
  */
-
   try {
-    const user = await User.findById(body.userId)// await
-    //console.log('user_____________________________________________', user)
-    /*   if (body.artist === undefined) {
-    return res.status(400).json({ error: 'artist missing' })
-  } */
+    const user = await User.findById(body.userId)
 
     const event = new Event({
       eventImage: req.file.path,
@@ -92,19 +78,14 @@ eventsRouter.post('/', upload.single('eventImage'),async(req, res) => {
     //user.events = await user.events.concat(savedEvent)
     //await user.save()
     res.status(200).json(savedEvent)
-    //res.json(savedEvent.toJSON())
-    // } catch(exception) {
-    //   next(exception)
-    // }
-    // })
   } catch (error) {
     console.log(error.message)
     res.status(400).json({ error: 'bad req' })
   }
 })
 
-
-eventsRouter.delete('/:id', checkLogin, async (req, res, next) => {
+//delete event for admin
+eventsRouter.delete('/:id', checkAdmin, async (req, res, next) => {
   try {
     const event = await Event.findByIdAndRemove(req.params.id)
     console.log(' artwork.eventImage', event.eventImage)

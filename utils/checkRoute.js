@@ -19,7 +19,6 @@ const authenticateToken = (req) => {
   if (!token || !decodedToken.id) {
     console.log('authent not working')
     return req.status(401).json({ error: 'token missing or invalid' })
-
     // return null
   }
   console.log('check returntoken')
@@ -27,24 +26,28 @@ const authenticateToken = (req) => {
 }
 
 
-//Checks that the logged in user is accessing methods meant for him/her
+//Checks that the logged in user is accessing methods meant for him/her with  request param id
 const checkUser = (req, res, next) => {
   try {
     const token = authenticateToken(req)
 
     if (!token) {
+      console.log('token missing or invalid')
       return res.status(401).json({ error: 'token missing or invalid' })
     }
 
     if (token.id.toString() !== req.params.id.toString()) {
+      console.log('not authorized user')
       return res.status(401).json({ error: 'not authorized user' })
     }
 
     next()
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
+      console.log('JsonWebTokenError')
       res.status(401).json({ error: error.message })
     } else {
+      console.log('error500', error)
       res.status(500).json({ error: error })
     }
   }
@@ -94,6 +97,8 @@ const checkAdmin = (req, res, next) => {
     }
   }
 }
+
+
 module.exports = {
   checkLogin,
   checkAdmin,
