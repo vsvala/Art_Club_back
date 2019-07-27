@@ -9,6 +9,7 @@ const artworkSchema = new mongoose.Schema({
   year: Number,
   size: String,
   medium: String,
+  likes: Number,
   user:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'User'

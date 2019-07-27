@@ -81,6 +81,7 @@ artworksRouter.post('/', checkLogin, upload.single('galleryImage'), async(req, r
       year: req.body.year,
       size: req.body.size,
       medium:req.body.medium,
+      likes: req.body.likes === '' ? false : req.body.likes === 0,
       user:req.body.userId
       //user: user._id,
     })
@@ -136,5 +137,23 @@ artworksRouter.delete('/:id',checkLogin, async (req, res, next) => {
     next(exception)
   }
 })
+
+//update likes
+artworksRouter.put('/:id', async(req, res) => {
+// const body = req.body
+  console.log('bodyId', req.body.id)
+  try {
+    //const artwork = await Artwork.findById(req.params.id)
+    const artwork= await Artwork.findById(req.body.id)
+    await artwork.update(
+      { likes:req.body.likes
+      })
+    res.json(artwork.toJSON())
+  } catch (exception) {
+    console.log(exception)
+    res.status(500).json({ error: 'did not update likes, something went wrong...' })
+  }
+})
+
 
 module.exports = artworksRouter
