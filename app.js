@@ -41,18 +41,18 @@ app.use('/uploads',express.static('uploads'))//create a static path reference to
 app.use('/public/uploads',express.static('uploads'))
 app.use(cors())
 
-// const apiUrl = '/api'
-// app.use(`${apiUrl}/users`, usersRouter)
-// app.use(`${apiUrl}/artworks`, artworksRouter)
-// app.use(`${apiUrl}/events`, eventsRouter)
-// app.use(`${apiUrl}/login`, loginRouter)
-// app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
+const apiUrl = '/api'
+app.use(`${apiUrl}/users`, usersRouter)
+app.use(`${apiUrl}/artworks`, artworksRouter)
+app.use(`${apiUrl}/events`, eventsRouter)
+app.use(`${apiUrl}/login`, loginRouter)
+app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
 
-app.use('/users', usersRouter)
-app.use('/artworks', artworksRouter)
-app.use('/events', eventsRouter)
-app.use('/login', loginRouter)
-app.use('/tokenCheck', tokenCheckRouter)
+// app.use('/users', usersRouter)
+// app.use('/artworks', artworksRouter)
+// app.use('/events', eventsRouter)
+// app.use('/login', loginRouter)
+// app.use('/tokenCheck', tokenCheckRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
