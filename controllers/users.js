@@ -66,9 +66,14 @@ usersRouter.get('/artist/:id', async (req, res) => {
   }
 })
 
-usersRouter.get('/:id',async(req, res, next) => {
+
+usersRouter.get('/mypage', checkLogin, async(req, res, next) => {
+
   try {
-    const user = await User.findById(req.params.id)
+    const token = authenticateToken(req)
+    console.log('token', token)
+    const user = await User.findById(token.id)
+    // const user = await User.findById(req.params.id)
       .populate('artworks')
     if(user){
       res.json(user.toJSON())}

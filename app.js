@@ -41,11 +41,12 @@ app.use('/uploads',express.static('uploads'))//create a static path reference to
 app.use('/public/uploads',express.static('uploads'))
 app.use(cors())
 
-app.use('/api/users', usersRouter)
-app.use('/api/artworks', artworksRouter)
-app.use('/api/events', eventsRouter)
-app.use('/api/login', loginRouter)
-app.use('/api/tokenCheck', tokenCheckRouter)
+const apiUrl = ''//'/api'
+app.use(`${apiUrl}/users`, usersRouter)
+app.use(`${apiUrl}/artworks`, artworksRouter)
+app.use(`${apiUrl}/events`, eventsRouter)
+app.use(`${apiUrl}/login`, loginRouter)
+app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
 //app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
 
 app.use(middleware.unknownEndpoint)
