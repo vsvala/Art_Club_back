@@ -48,12 +48,6 @@ app.use(`${apiUrl}/events`, eventsRouter)
 app.use(`${apiUrl}/login`, loginRouter)
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
 
-// app.use('/users', usersRouter)
-// app.use('/artworks', artworksRouter)
-// app.use('/events', eventsRouter)
-// app.use('/login', loginRouter)
-// app.use('/tokenCheck', tokenCheckRouter)
-
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
