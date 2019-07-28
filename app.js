@@ -47,7 +47,6 @@ app.use(`${apiUrl}/artworks`, artworksRouter)
 app.use(`${apiUrl}/events`, eventsRouter)
 app.use(`${apiUrl}/login`, loginRouter)
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
-//app.use('/api/images', imageRouter)//express.static('uploads'))//statistic path for the images//, imageRouter
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
