@@ -3,7 +3,8 @@ const multer = require('multer')
 const Artwork = require('../models/artwork')
 const User = require('../models/user')
 const { checkLogin } = require('../utils/checkRoute')
-
+// const cloudinary = require('cloudinary')
+// const cloudinaryStorage = require('multer-storage-cloudinary')
 
 //multer saves image to folder
 const storage = multer.diskStorage({
@@ -87,7 +88,7 @@ artworksRouter.post('/', checkLogin, upload.single('galleryImage'), async(req, r
     })
     const savedArtwork =await artwork.save()
     console.log('savedartwolrid',savedArtwork)
-    //TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOhuom id vai artwork
+    //TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO id vai artwork
     //savedArtwork.id
     user.artworks = await user.artworks.concat(savedArtwork.id)
     await user.save()
