@@ -41,7 +41,7 @@ app.use('/uploads',express.static('uploads'))//create a static path reference to
 app.use('/public/uploads',express.static('uploads'))
 app.use(cors())
 
-const apiUrl = ''//'/api'
+const apiUrl = '/api'
 app.use(`${apiUrl}/users`, usersRouter)
 app.use(`${apiUrl}/artworks`, artworksRouter)
 app.use(`${apiUrl}/events`, eventsRouter)
