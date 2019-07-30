@@ -36,7 +36,7 @@ fileFilter:fileFilter
 
 //for Heroku routing problem
 eventsRouter.get('/*', function(req, res) {
-  res.sendFile('path to index.html')
+  res.sendFile('/')
 })
 
 //gets all events
