@@ -33,11 +33,6 @@ const upload = multer({ storage: storage, limits:{
 fileFilter:fileFilter
 })
 
-//for Heroku routing problem
-artworksRouter.get('/*', function(req, res) {
-  res.sendFile('/')
-})
-
 // gets all artworks and populates user details
 artworksRouter.get('/', async(req, res, next) => {
   try{
