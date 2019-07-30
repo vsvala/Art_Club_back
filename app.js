@@ -33,13 +33,14 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
 mongoose.set('useCreateIndex', true)
 
 // Middlewares
+app.use(cors())
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
 app.use(express.static('build'))
 app.use('/uploads',express.static('uploads'))//create a static path reference to folder
 app.use('/public/uploads',express.static('uploads'))
-app.use(cors())
+
 
 const apiUrl = '/api'
 app.use(`${apiUrl}/users`, usersRouter)
