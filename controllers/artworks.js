@@ -155,9 +155,9 @@ artworksRouter.put('/:id', async(req, res) => {
 })
 
 
-// gets all artworks and populates user details
+// heroku reload page fix
 artworksRouter.get('/*', async(req, res) => {
-  await res.sendFile(__dirname+'/index.html')
+  await res.sendFile('../build/index.html')
 })
 
 
