@@ -155,4 +155,11 @@ artworksRouter.put('/:id', async(req, res) => {
 })
 
 
+// gets all artworks and populates user details
+artworksRouter.get('/*', async(req, res) => {
+  await res.sendFile(__dirname+'/index.html')
+})
+
+
+
 module.exports = artworksRouter
