@@ -3,15 +3,8 @@ const multer = require('multer')
 const Artwork = require('../models/artwork')
 const User = require('../models/user')
 const { checkLogin } = require('../utils/checkRoute')
-
-const express = require('express')
-const path = require('path')
 // const cloudinary = require('cloudinary')
 // const cloudinaryStorage = require('multer-storage-cloudinary')
-
-
-// Serve the static files from the React app
-artworksRouter.use(express.static(path.join(__dirname, 'https://artclub-project.herokuapp.com/build')))
 
 
 //multer saves image to folder
@@ -165,7 +158,7 @@ artworksRouter.put('/:id', async(req, res) => {
 
 // heroku reload page fix
 artworksRouter.get('/*', (req, res) => {
-  res.sendFile('https://artclub-project.herokuapp.com/')
+  res.sendFile('public/index.html', { root: __dirname })
 })
 
 

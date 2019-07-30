@@ -218,7 +218,7 @@ usersRouter.delete('/:id', checkAdmin, async (req, res) => {
 })
 // heroku reload page fix
 usersRouter.get('/*', async(req, res) => {
-  await res.sendFile('https://artclub-project.herokuapp.com/')
+  await res.sendFile('/index.html')
 })
 
 module.exports = usersRouter

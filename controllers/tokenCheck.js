@@ -10,7 +10,7 @@ tokenCheckRouter.get('/', checkLogin, (req, res) => {
 
 // heroku reload page fix
 tokenCheckRouter.get('/*', async(req, res) => {
-  await res.sendFile('https://artclub-project.herokuapp.com/build/ndex.html')
+  await res.sendFile('./build/index.html')
 })
 
 module.exports = tokenCheckRouter
