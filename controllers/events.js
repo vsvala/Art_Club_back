@@ -104,12 +104,12 @@ eventsRouter.delete('/:id', checkAdmin, async (req, res, next) => {
   }
 })
 
-// heroku reload page fix
-eventsRouter.get('/*', async(req, res) => {
-// await res.sendFile('/build/index.html')
-  await res.sendFile('/build/public/index.html', { root: __dirname })
+// // heroku reload page fix
+// eventsRouter.get('/*', async(req, res) => {
+// // await res.sendFile('/build/index.html')
+//   await res.sendFile('/build/public/index.html', { root: __dirname })
 
-})
+// })
 
 
 module.exports = eventsRouter

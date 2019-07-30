@@ -158,7 +158,7 @@ artworksRouter.put('/:id', async(req, res) => {
 
 // heroku reload page fix
 artworksRouter.get('/*', (req, res) => {
-  res.sendFile('public/index.html', { root: __dirname })
+  res.sendFile('../build/index.html', { root: __dirname })
 })
 
 

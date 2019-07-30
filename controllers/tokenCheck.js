@@ -8,9 +8,9 @@ tokenCheckRouter.get('/', checkLogin, (req, res) => {
   res.status(200).json({ message: 'success' })
 })
 
-// heroku reload page fix
-tokenCheckRouter.get('/*', async(req, res) => {
-  await res.sendFile('./build/index.html')
-})
+// // heroku reload page fix
+// tokenCheckRouter.get('/*', async(req, res) => {
+//   await res.sendFile('./build/index.html')
+// })
 
 module.exports = tokenCheckRouter
