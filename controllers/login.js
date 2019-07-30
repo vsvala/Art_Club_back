@@ -6,7 +6,7 @@ const config = require('../utils/config')
 
 //for Heroku routing problem
 loginRouter.get('/*', function(req, res) {
-  res.sendFile('path to index.html')
+  res.sendFile('/')
 })
 
 loginRouter.post('/', async (req, res) => {

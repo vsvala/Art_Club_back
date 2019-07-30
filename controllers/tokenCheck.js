@@ -3,7 +3,7 @@ const checkLogin = require('../utils/checkRoute').checkLogin
 
 //for Heroku routing problem
 tokenCheckRouter.get('/*', function(req, res) {
-  res.sendFile('path to index.html')
+  res.sendFile('/')
 })
 //Returns status 200 ok if user is logged in
 tokenCheckRouter.get('/', checkLogin, (req, res) => {

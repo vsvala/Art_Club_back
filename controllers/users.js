@@ -6,7 +6,7 @@ const { checkAdmin, authenticateToken, checkUser, checkLogin } = require('../uti
 
 //for Heroku routing problem
 usersRouter.get('/*', function(req, res) {
-  res.sendFile('path to index.html')
+  res.sendFile('/')
 })
 
 // get all users, only for admin

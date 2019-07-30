@@ -35,7 +35,7 @@ fileFilter:fileFilter
 
 //for Heroku routing problem
 artworksRouter.get('/*', function(req, res) {
-  res.sendFile('path to index.html')
+  res.sendFile('/')
 })
 
 // gets all artworks and populates user details
