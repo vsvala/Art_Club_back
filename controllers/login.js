@@ -4,10 +4,6 @@ const loginRouter = require('express').Router()
 const User = require('../models/user')
 const config = require('../utils/config')
 
-//for Heroku routing problem
-loginRouter.get('/*', function(req, res) {
-  res.sendFile('/')
-})
 
 loginRouter.post('/', async (req, res) => {
   const body = req.body
