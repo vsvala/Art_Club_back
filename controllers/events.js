@@ -34,6 +34,10 @@ const upload = multer({ storage: storage, limits:{ fileSize:1024*1024 *5
 fileFilter:fileFilter
 })
 
+//for Heroku routing problem
+eventsRouter.get('/*', function(req, res) {
+  res.sendFile('path to index.html')
+})
 
 //gets all events
 eventsRouter.get('/',checkLogin, async(req, res) => {

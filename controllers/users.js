@@ -4,6 +4,10 @@ const User = require('../models/user')
 //const jwt = require('jsonwebtoken')
 const { checkAdmin, authenticateToken, checkUser, checkLogin } = require('../utils/checkRoute')
 
+//for Heroku routing problem
+usersRouter.get('/*', function(req, res) {
+  res.sendFile('path to index.html')
+})
 
 // get all users, only for admin
 usersRouter.get('/',checkAdmin, async (req, res) => {

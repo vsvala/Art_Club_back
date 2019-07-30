@@ -1,6 +1,10 @@
 const tokenCheckRouter = require('express').Router()
 const checkLogin = require('../utils/checkRoute').checkLogin
 
+//for Heroku routing problem
+tokenCheckRouter.get('/*', function(req, res) {
+  res.sendFile('path to index.html')
+})
 //Returns status 200 ok if user is logged in
 tokenCheckRouter.get('/', checkLogin, (req, res) => {
   console.log('router')
