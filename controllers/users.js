@@ -216,9 +216,9 @@ usersRouter.delete('/:id', checkAdmin, async (req, res) => {
     res.status(400).json({ error: 'bad req' })
   }
 })
-// heroku reload page fix
-usersRouter.get('/*', async(req, res) => {
-  await res.sendFile('/index.html')
-})
+// // heroku reload page fix
+// usersRouter.get('/*', async(req, res) => {
+//   await res.sendFile('/index.html')
+// })
 
 module.exports = usersRouter
