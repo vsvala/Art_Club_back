@@ -41,6 +41,12 @@ app.use(express.static('build'))
 app.use('/uploads',express.static('uploads'))//create a static path reference to folder
 app.use('/public/uploads',express.static('uploads'))
 
+if (process.env.NODE_ENV === 'production') {
+  // Serve any static files
+  app.use(express.static(path.join(__dirname, 'client/build')));// Handle React routing, return all requests to React app
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
 
 const apiUrl = '/api'
 app.use(`${apiUrl}/users`, usersRouter)
