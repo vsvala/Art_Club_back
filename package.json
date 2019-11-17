@@ -1,6 +1,9 @@
 {
   "name": "art_club_back",
   "version": "1.0.0",
+  "engines": { 
+    "node": "8.9.4" 
+ },
   "description": "Art Club backend",
   "main": "index.js",
   "scripts": {
