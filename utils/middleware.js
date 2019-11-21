@@ -8,11 +8,6 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-
-const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: 'unknown endpoint' })
-}
-
 const errorHandler = (error, req, res, next) => {
   console.error(error.message)
   if (error.name === 'CastError' && error.kind === 'ObjectId') {
@@ -30,6 +25,5 @@ const errorHandler = (error, req, res, next) => {
 
 module.exports = {
   requestLogger,
-  unknownEndpoint,
   errorHandler
 }
