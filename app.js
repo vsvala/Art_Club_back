@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
+const path = require('path')
 
 //Routrers
 const usersRouter = require('./controllers/users')
@@ -49,8 +50,16 @@ app.use(`${apiUrl}/events`, eventsRouter)
 app.use(`${apiUrl}/login`, loginRouter)
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter)
 
+if (process.env.NODE_ENV === 'production') {
+  const FRONTEND_PATH = path.join(__dirname, 'build')
+  app.use(express.static(FRONTEND_PATH))// Handle React routing, return all requests to React app
 
-app.use(middleware.unknownEndpoint)
+  // Serve any static files
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(FRONTEND_PATH, 'index.html'))
+  })
+}
+
 app.use(middleware.errorHandler)
 
 module.exports = app
