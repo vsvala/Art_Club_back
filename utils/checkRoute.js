@@ -1,108 +1,105 @@
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 //const config = require('./config')
 
 //Gets the encoded token of the logged user
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    console.log('authorizsubstring7',authorization.substring(7) )
-    return authorization.substring(7)
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    console.log("authorizsubstring7", authorization.substring(7));
+    return authorization.substring(7);
   }
-  return null
-}
+  return null;
+};
 
 //Checks that the token is valid and not expired. Returns tokens contents
-const authenticateToken = (req) => {
-  const token = getTokenFrom(req)
-  const decodedToken = jwt.verify(token, process.env.SECRET)
+const authenticateToken = (req, res) => {
+  const token = getTokenFrom(req);
+  const decodedToken = jwt.verify(token, process.env.SECRET);
 
   if (!token || !decodedToken.id) {
-    console.log('authent not working')
-    return req.status(401).json({ error: 'token missing or invalid' })
-    // return null
+    console.log("authent not working");
+    return res.status(401).json({ error: "token missing or invalid" });
   }
-  console.log('check returntoken')
-  return decodedToken
-}
-
+  console.log("check returntoken");
+  return decodedToken;
+};
 
 //Checks that the logged in user is accessing methods meant for him/her with  request param id
 const checkUser = (req, res, next) => {
   try {
-    const token = authenticateToken(req)
+    const token = authenticateToken(req);
 
     if (!token) {
-      console.log('token missing or invalid')
-      return res.status(401).json({ error: 'token missing or invalid' })
+      console.log("token missing or invalid");
+      return res.status(401).json({ error: "token missing or invalid" });
     }
 
     if (token.id.toString() !== req.params.id.toString()) {
-      console.log('not authorized user')
-      return res.status(401).json({ error: 'not authorized user' })
+      console.log("not authorized user");
+      return res.status(401).json({ error: "not authorized user" });
     }
 
-    next()
+    next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      console.log('JsonWebTokenError')
-      res.status(401).json({ error: error.message })
+    if (error.name === "JsonWebTokenError") {
+      console.log("JsonWebTokenError");
+      res.status(401).json({ error: error.message });
     } else {
-      console.log('error500', error)
-      res.status(500).json({ error: error })
+      console.log("error500", error);
+      res.status(500).json({ error: error });
     }
   }
-}
+};
 //Checks that the user is logged in
 const checkLogin = (req, res, next) => {
   try {
-    const token = authenticateToken(req)
-    console.log('token from checklogin is ok', token)
+    const token = authenticateToken(req);
+    console.log("token from checklogin is ok", token);
 
     if (!token) {
-      console.log('checklogin tokenmissing')
-      return res.status(401).json({ error: 'token missing or invalid' })
+      console.log("checklogin tokenmissing");
+      return res.status(401).json({ error: "token missing or invalid" });
     }
 
-    next()
+    next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      console.log('checklogin JsonWebTokenError ')
-      res.status(401).json({ error: error.message })
+    if (error.name === "JsonWebTokenError") {
+      console.log("checklogin JsonWebTokenError ");
+      res.status(401).json({ error: error.message });
     } else {
-      console.log('checklogin terror')
-      res.status(500).json({ error: error })
+      console.log("checklogin terror");
+      res.status(500).json({ error: error });
     }
   }
-}
+};
 
 //Checks if the logged in user is an admin
 const checkAdmin = (req, res, next) => {
   try {
-    const token = authenticateToken(req)
+    const token = authenticateToken(req);
 
     if (!token) {
-      return res.status(401).json({ error: 'token missing or invalid' })
+      return res.status(401).json({ error: "token missing or invalid" });
     }
-    console.log('tokenrole', token.role)
-    if (token.role !== 'admin') {
-      return res.status(401).json({ error: 'not admin' })
+    console.log("tokenrole", token.role);
+    if (token.role !== "admin") {
+      return res.status(401).json({ error: "not admin" });
     }
 
-    next()
+    next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      res.status(401).json({ error: error.message })
+    if (error.name === "JsonWebTokenError") {
+      res.status(401).json({ error: error.message });
     } else {
-      res.status(500).json({ error: error })
+      res.status(500).json({ error: error });
     }
   }
-}
-
+};
 
 module.exports = {
   checkLogin,
   checkAdmin,
   checkUser,
   getTokenFrom,
-  authenticateToken
-}
+  authenticateToken,
+};
