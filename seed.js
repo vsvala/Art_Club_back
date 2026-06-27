@@ -1,6 +1,7 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const cloudinary = require('cloudinary').v2
 const User = require('./models/user')
 const Artwork = require('./models/artwork')
 const Event = require('./models/event')
@@ -12,16 +13,29 @@ if (!MONGODB_URI) {
   process.exit(1)
 }
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+const uploadToCloudinary = async (filePath) => {
+  const result = await cloudinary.uploader.upload(filePath, { folder: 'artclub' })
+  return result.secure_url
+}
+
 const seed = async () => {
   await mongoose.connect(MONGODB_URI)
   console.log('Connected to MongoDB')
 
-  const existingUsers = await User.countDocuments()
-  if (existingUsers > 0) {
-    console.log('Database already has data, skipping seed.')
-    await mongoose.connection.close()
-    return
-  }
+  await mongoose.connection.dropDatabase()
+  console.log('Database cleared.')
+
+  console.log('Uploading images to Cloudinary...')
+  const img1 = await uploadToCloudinary('./uploads/1563988999871badgerweb.jpg')
+  const img2 = await uploadToCloudinary('./uploads/1563989060359foxrollweb.jpg')
+  const img3 = await uploadToCloudinary('./uploads/1564248858586bunnyweb.jpg')
+  console.log('Images uploaded.')
 
   const passwordHash = await bcrypt.hash('admin123', 10)
 
@@ -54,6 +68,7 @@ const seed = async () => {
     size: '60x80 cm',
     medium: 'Oil on canvas',
     likes: 0,
+    galleryImage: img1,
     user: member._id,
   })
 
@@ -64,10 +79,22 @@ const seed = async () => {
     size: '40x50 cm',
     medium: 'Acrylic on canvas',
     likes: 0,
+    galleryImage: img2,
     user: member._id,
   })
 
-  member.artworks = [artwork1._id, artwork2._id]
+  const artwork3 = await Artwork.create({
+    name: 'Forest Study',
+    artist: 'Anna Artist',
+    year: 2024,
+    size: '30x40 cm',
+    medium: 'Watercolor',
+    likes: 0,
+    galleryImage: img3,
+    user: member._id,
+  })
+
+  member.artworks = [artwork1._id, artwork2._id, artwork3._id]
   await member.save()
 
   await Event.create({
