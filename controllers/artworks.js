@@ -3,20 +3,33 @@ const multer = require("multer");
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const { checkLogin } = require("../utils/checkRoute");
-// const cloudinary = require('cloudinary')
-// const cloudinaryStorage = require('multer-storage-cloudinary')
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 //multer saves image to folder
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads/"); //./public
-    console.log("storage");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + file.originalname);
-    console.log("filename");
+//const storage = multer.diskStorage({
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "artclub",
+    allowed_formats: ["jpg", "jpeg", "png", "gif"],
   },
 });
+// destination: function (req, file, cb) {
+//   cb(null, "./uploads/"); //./public
+//   console.log("storage");
+// },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + file.originalname);
+//     console.log("filename");
+//   },
+// });
 const fileFilter = (req, file, cb) => {
   //rejects storing a nonpicture file
   if (
@@ -34,9 +47,7 @@ const fileFilter = (req, file, cb) => {
 };
 const upload = multer({
   storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 5,
-  },
+  limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: fileFilter,
 });
 
@@ -118,30 +129,16 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
     // const user = await User.findById(decodedToken.id)
     // console.log('user',user)
 
-    //filter away artwork from users artworkList
-    //await Artwork.User.update(
-    //   { 'artwork': req.params.id },
-    //   { '$pull': { 'user':user.id } },
-    //   function (err, res){
-    //     if (err) throw err
-    //     res.json(res)
-    //   }
-    // )
-    // await User.update({ _id: user.id }, { '$pull': { 'artworks': {'ObjectId': 'req.params.id' } } } )
-    const artwork = await Artwork.findByIdAnDelete(req.params.id);
-
-    //deleting image from uploads folder
-    console.log(" artwork.galleryImage", artwork.galleryImage);
-    const fs = require("fs");
-    const filePath = "./" + artwork.galleryImage;
-    fs.access(filePath, (error) => {
-      if (!error) {
-        fs.unlinkSync(filePath);
-      } else {
-        console.log(error);
-      }
-    });
-    res.status(204).end(); //No Content success
+    const artwork = await Artwork.findByIdAndDelete(req.params.id);
+    if (artwork && artwork.galleryImage) {
+      const urlParts = artwork.galleryImage.split("/");
+      const filenameWithExt = urlParts[urlParts.length - 1];
+      const filename = filenameWithExt.split(".")[0];
+      const folder = urlParts[urlParts.length - 2];
+      const publicId = `${folder}/${filename}`;
+      await cloudinary.uploader.destroy(publicId);
+    }
+    res.status(204).end();
   } catch (exception) {
     next(exception);
   }

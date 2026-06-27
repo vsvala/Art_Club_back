@@ -66,3 +66,5 @@ typings/
 node_modules
 
 update.md
+deploy.md
+z_plans/
