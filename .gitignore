@@ -64,3 +64,5 @@ typings/
 .next
 
 node_modules
+
+update.md
