@@ -1,5 +1,6 @@
 const config = require("./utils/config");
 const express = require("express");
+const path = require("path");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -43,6 +44,11 @@ app.use(`${apiUrl}/artworks`, artworksRouter);
 app.use(`${apiUrl}/events`, eventsRouter);
 app.use(`${apiUrl}/login`, loginRouter);
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
+
+// Serve React app for all non-API routes so browser refresh works on any path
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
