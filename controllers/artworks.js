@@ -4,7 +4,6 @@ const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const { checkLogin } = require("../utils/checkRoute");
 const cloudinary = require("cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,26 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-//multer saves image to folder
-//const storage = multer.diskStorage({
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "artclub",
-    allowed_formats: ["jpg", "jpeg", "png", "gif"],
-  },
-});
-// destination: function (req, file, cb) {
-//   cb(null, "./uploads/"); //./public
-//   console.log("storage");
-// },
-//   filename: function (req, file, cb) {
-//     cb(null, Date.now() + file.originalname);
-//     console.log("filename");
-//   },
-// });
 const fileFilter = (req, file, cb) => {
-  //rejects storing a nonpicture file
   if (
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/png" ||
@@ -39,17 +19,28 @@ const fileFilter = (req, file, cb) => {
     file.mimetype === "image/gif"
   ) {
     cb(null, true);
-    console.log("mimetype true");
   } else {
-    console.log("false");
     cb(null, false);
   }
 };
+
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: fileFilter,
 });
+
+const uploadToCloudinary = (buffer, mimetype) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "artclub" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
 
 // gets all artworks and populates user details
 artworksRouter.get("/", async (req, res, next) => {
@@ -95,9 +86,10 @@ artworksRouter.post(
 
     try {
       const user = await User.findById(body.userId);
+      const imageUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
 
       const artwork = new Artwork({
-        galleryImage: req.file.path,
+        galleryImage: imageUrl,
         artist: req.body.artist,
         name: req.body.name,
         year: req.body.year,
