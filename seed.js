@@ -34,11 +34,9 @@ const seed = async () => {
   console.log("Database cleared.");
 
   console.log("Uploading images to Cloudinary...");
-  const img1 = await uploadToCloudinary("./uploads/1563988999871badgerweb.jpg");
-  const img2 = await uploadToCloudinary(
-    "./uploads/1563989060359foxrollweb.jpg",
-  );
-  const img3 = await uploadToCloudinary("./uploads/1564248858586bunnyweb.jpg");
+  const ketut = await uploadToCloudinary("./uploads/ketut.jpg");
+  const jano = await uploadToCloudinary("./uploads/jano.jpg");
+  const mayra = await uploadToCloudinary("./uploads/mayra.jpg");
   console.log("Images uploaded.");
 
   const passwordHash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 10);
@@ -66,35 +64,35 @@ const seed = async () => {
   });
 
   const artwork1 = await Artwork.create({
-    name: "Blue Morning",
+    name: "Friends 4 ever",
     artist: "Anna Artist",
     year: 2023,
     size: "60x80 cm",
     medium: "Oil on canvas",
     likes: 0,
-    galleryImage: img1,
+    galleryImage: ketut,
     user: member._id,
   });
 
   const artwork2 = await Artwork.create({
-    name: "Urban Flow",
+    name: "Sleeping bunny",
     artist: "Anna Artist",
     year: 2024,
     size: "40x50 cm",
     medium: "Acrylic on canvas",
     likes: 0,
-    galleryImage: img2,
+    galleryImage: jano,
     user: member._id,
   });
 
   const artwork3 = await Artwork.create({
-    name: "Forest Study",
+    name: "leeping Badgers",
     artist: "Anna Artist",
     year: 2024,
     size: "30x40 cm",
     medium: "Watercolor",
     likes: 0,
-    galleryImage: img3,
+    galleryImage: mayra,
     user: member._id,
   });
 
@@ -122,8 +120,16 @@ const seed = async () => {
   });
 
   console.log("Seed complete!");
-  console.log("  admin    / admin123  (role: admin)");
-  console.log("  anna     / member123 (role: member)");
+  console.log(
+    "  admin    /",
+    process.env.SEED_ADMIN_PASSWORD,
+    " (role: admin)",
+  );
+  console.log(
+    "  anna     /",
+    process.env.SEED_MEMBER_PASSWORD,
+    " (role: member)",
+  );
 
   await mongoose.connection.close();
 };
