@@ -47,6 +47,9 @@ node_modules/
 # dotenv environment variables file
 .env
 
+# Uploaded images — stored in Cloudinary, not in git
+uploads/
+
 
 update.md
 deploy.md
