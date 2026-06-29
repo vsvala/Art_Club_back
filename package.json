@@ -18,7 +18,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production node index.js",
-    "watch": "NODE_ENV=development nodemon index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
     "test": "jest --verbose",
     "lint": "eslint .",
     "codecov": "node_modules/.bin/codecov",
@@ -29,7 +29,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "body-parser": "^1.19.0",
-    "cloudinary": "^1.41.3",
+    "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
@@ -52,5 +52,8 @@
     "testEnvironment": "node",
     "coverageDirectory": "./coverage/",
     "collectCoverage": true
+  },
+  "overrides": {
+    "tar": "^7.5.19"
   }
 }
