@@ -1,5 +1,8 @@
 # Art Club — Backend API
 
+> This is the **backend** part of the Art Club fullstack project.
+> Frontend repository: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
+
 REST API Node.js/Express-sovellus Art Club -galleriapalvelulle. Käyttää MongoDB-tietokantaa ja Cloudinary-pilvipalvelua kuvien tallentamiseen.
 
 ---
