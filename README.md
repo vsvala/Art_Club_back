@@ -1,7 +1,9 @@
 # Art Club — Backend API
 
-> This is the **backend** part of the Art Club fullstack project.
-> Frontend repository: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
+> Tämä on Art Club -fullstack-projektin **backend**-osa.
+> Frontend-repositorio: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
+
+**Tuotanto:** [artclub-q41z.onrender.com](https://artclub-q41z.onrender.com)
 
 REST API Node.js/Express-sovellus Art Club -galleriapalvelulle. Käyttää MongoDB-tietokantaa ja Cloudinary-pilvipalvelua kuvien tallentamiseen.
 
@@ -111,6 +113,34 @@ erDiagram
     User ||--o{ Artwork : "omistaa"
     User ||--o{ Event : "luo"
 ```
+
+### Kuvan lähetys (Multer + Cloudinary)
+
+```mermaid
+sequenceDiagram
+    participant Client as Frontend
+    participant API as Express API
+    participant Cloudinary
+
+    Client->>API: POST /api/artworks (multipart/form-data)
+    Note right of Client: galleryImage + artwork data
+    API->>API: multer vastaanottaa tiedoston muistiin (buffer)
+    API->>API: fileFilter tarkistaa tiedostotyypin (jpg/png/gif)
+    API->>Cloudinary: upload_stream(buffer) → kansio "artclub"
+    Cloudinary-->>API: secure_url (https://res.cloudinary.com/...)
+    API->>API: Tallennetaan secure_url tietokantaan
+    API-->>Client: 200 { savedArtwork }
+```
+
+**Miten toimii:**
+- **multer** vastaanottaa `multipart/form-data` -pyynnön ja tallentaa kuvan väliaikaisesti palvelimen muistiin (ei levylle)
+- **fileFilter** hylkää tiedostot jotka eivät ole kuvia (jpg, png, gif)
+- Koodi lähettää muistissa olevan kuvan suoraan Cloudinaryyn `upload_stream`:llä
+- Cloudinary palauttaa pysyvän URL:in joka tallennetaan tietokantaan `galleryImage`-kenttään
+- Frontend käyttää tätä URL:ia suoraan `<img src={artwork.galleryImage} />` — kuva tulee Cloudinaryn CDN:stä
+
+**Kuvan poisto:**
+Kun taideteos poistetaan, backend purkaa Cloudinary-URL:ista `public_id`:n ja kutsuu `cloudinary.uploader.destroy()` poistaakseen kuvan myös Cloudinarystä.
 
 ### Autentikaatioflow
 

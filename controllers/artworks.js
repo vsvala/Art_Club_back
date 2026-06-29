@@ -3,7 +3,7 @@ const multer = require("multer");
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const { checkLogin } = require("../utils/checkRoute");
-const cloudinary = require("cloudinary");
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
