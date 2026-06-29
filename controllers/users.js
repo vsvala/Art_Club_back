@@ -121,7 +121,7 @@ usersRouter.post("/", async (req, res) => {
       email: body.email,
       username: body.username,
       passwordHash,
-      role: body.role,
+      role: "nonMember", // // ← important !!! backend asettaa aina itse, ei req.body.role ettei kukaan pääse hyökkäämään
     });
     console.log("user", user);
     const savedUser = await user.save();
