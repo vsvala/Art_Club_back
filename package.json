@@ -31,7 +31,7 @@
     "body-parser": "^1.19.0",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "form-data": "^4.0.6",
     "jsonwebtoken": "^9.0.3",
@@ -41,12 +41,12 @@
     "multer-storage-cloudinary": "^4.0.0"
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
-    "eslint": "^5.16.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^10.6.0",
     "eslint-plugin-react": "^7.13.0",
-    "jest": "^24.8.0",
-    "nodemon": "^1.19.1",
-    "supertest": "^4.0.2"
+    "jest": "^30.0.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   },
   "jest": {
     "testEnvironment": "node",
