@@ -137,6 +137,10 @@ usersRouter.post("/", async (req, res) => {
 //Updates user role, only for admin
 usersRouter.put("/admin", checkAdmin, async (req, res) => {
   const body = req.body;
+  const allowedRoles = ["member", "nonMember", "admin"];
+  if (!allowedRoles.includes(body.role)) {
+    return res.status(400).json({ error: "invalid role" });
+  }
   try {
     const updatedUser = await User.findByIdAndUpdate(body._id, {
       role: body.role,

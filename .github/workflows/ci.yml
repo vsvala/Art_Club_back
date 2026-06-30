@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+    types: [opened, synchronize]
+
+jobs:
+  ci-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check style
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+  deploy:
+    needs: [ci-build-and-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')
+    steps:
+      - name: Trigger Render deploy
+        run: curl --fail -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+  # --- Vaihe : Tag release ---
+  # Luo automaattisesti uuden patch-version tagin onnistuneen deployn jälkeen
+  tag_release:
+    needs: [ci-build-and-test, deploy]
+    runs-on: ubuntu-latest
+    if: |
+      github.ref == 'refs/heads/master' &&
+      github.event_name == 'push' &&
+      !contains(github.event.head_commit.message, '#skip')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
