@@ -76,7 +76,12 @@ app.get("/api/weather", async (req, res) => {
       temperature: weatherData.current.temperature_2m,
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data" });
+    console.error("Weather error:", error);
+    res.status(500).json({
+      error: "Failed to fetch weather data",
+      error: error.message,
+      stack: error.stack,
+    });
   }
 });
 
