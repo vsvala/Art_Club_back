@@ -1,5 +1,7 @@
 # Art Club — Backend API
 
+[![CI/CD Pipeline](https://github.com/vsvala/Art_Club_back/actions/workflows/ci.yml/badge.svg)](https://github.com/vsvala/Art_Club_back/actions/workflows/ci.yml)
+
 > This is the **backend** of the Art Club fullstack project.
 > Frontend repository: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
 
