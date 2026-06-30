@@ -10,6 +10,17 @@ on:
 jobs:
   ci-build-and-test:
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+
+    env:
+      TEST_MONGODB_URI: mongodb://localhost:27017/art_club_test
+      SECRET: ${{ secrets.SECRET }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,7 +34,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test
+        run: npm test -- --forceExit
 
       - name: Security audit
         run: npm audit --audit-level=high
