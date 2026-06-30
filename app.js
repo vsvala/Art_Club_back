@@ -65,10 +65,11 @@ app.get("/api/weather", async (req, res) => {
     // console.log("place.longitude", place.longitude);
 
     const weather = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code`,
     );
+
     const weatherData = await weather.json();
-    //console.log("weatherdata", weatherData);
+    console.log("weatherdata", weatherData);
 
     if (
       !weatherData.current ||
@@ -81,6 +82,7 @@ app.get("/api/weather", async (req, res) => {
       city: place.name,
       country: place.country,
       temperature: weatherData.current.temperature_2m,
+      weather_code: weatherData.current.weather_code,
     });
   } catch (error) {
     // console.error("Weather error:", error);
