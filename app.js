@@ -48,28 +48,36 @@ app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Helsinki";
 
-  const geo = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`,
-    // `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
-  );
-  const geoData = await geo.json();
+  try {
+    const geo = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`,
+      // `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+    );
+    const geoData = await geo.json();
 
-  const place = geoData.results[0];
+    if (!geoData.results || geoData.results.length === 0) {
+      return res.status(404).json({ error: `City "${city}" not found` });
+    }
 
-  console.log("place.latitude", place.latitude);
-  console.log("place.longitude", place.longitude);
+    const place = geoData.results[0];
 
-  const weather = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m`,
-  );
-  const weatherData = await weather.json();
-  console.log("weatherdata", weatherData);
+    // console.log("place.latitude", place.latitude);
+    // console.log("place.longitude", place.longitude);
 
-  res.json({
-    city: place.name,
-    country: place.country,
-    temperature: weatherData.current.temperature_2m,
-  });
+    const weather = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m`,
+    );
+    const weatherData = await weather.json();
+    //console.log("weatherdata", weatherData);
+
+    res.json({
+      city: place.name,
+      country: place.country,
+      temperature: weatherData.current.temperature_2m,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch weather data" });
+  }
 });
 
 // Serve React app for all non-API routes so browser refresh works on any path
