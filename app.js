@@ -45,6 +45,33 @@ app.use(`${apiUrl}/events`, eventsRouter);
 app.use(`${apiUrl}/login`, loginRouter);
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 
+app.get("/api/weather", async (req, res) => {
+  const city = req.query.city || "Helsinki";
+
+  const geo = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`,
+    // `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+  );
+  const geoData = await geo.json();
+
+  const place = geoData.results[0];
+
+  console.log("place.latitude", place.latitude);
+  console.log("place.longitude", place.longitude);
+
+  const weather = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m`,
+  );
+  const weatherData = await weather.json();
+  console.log("weatherdata", weatherData);
+
+  res.json({
+    city: place.name,
+    country: place.country,
+    temperature: weatherData.current.temperature_2m,
+  });
+});
+
 // Serve React app for all non-API routes so browser refresh works on any path
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
