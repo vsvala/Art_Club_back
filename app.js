@@ -70,13 +70,20 @@ app.get("/api/weather", async (req, res) => {
     const weatherData = await weather.json();
     //console.log("weatherdata", weatherData);
 
+    if (
+      !weatherData.current ||
+      weatherData.current.temperature_2m === undefined
+    ) {
+      return res.status(502).json({ error: "Weather data unavailable" });
+    }
+
     res.json({
       city: place.name,
       country: place.country,
       temperature: weatherData.current.temperature_2m,
     });
   } catch (error) {
-    console.error("Weather error:", error);
+    // console.error("Weather error:", error);
     res.status(500).json({
       error: "Failed to fetch weather data",
       error: error.message,

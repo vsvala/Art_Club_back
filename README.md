@@ -1,26 +1,27 @@
 # Art Club — Backend API
 
-> Tämä on Art Club -fullstack-projektin **backend**-osa.
-> Frontend-repositorio: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
+> This is the **backend** of the Art Club fullstack project.
+> Frontend repository: [github.com/vsvala/Art_Club](https://github.com/vsvala/Art_Club)
 
-**Tuotanto:** [artclub-q41z.onrender.com](https://artclub-q41z.onrender.com)
+**Production:** [artclub-q41z.onrender.com](https://artclub-q41z.onrender.com)
 
-REST API Node.js/Express-sovellus Art Club -galleriapalvelulle. Käyttää MongoDB-tietokantaa ja Cloudinary-pilvipalvelua kuvien tallentamiseen.
-
----
-
-## Teknologiat
-
-- **Node.js** + **Express** — palvelinohjelma
-- **MongoDB** + **Mongoose** — tietokanta
-- **Cloudinary** — kuvien pilvivarastointi
-- **JWT** — käyttäjien tunnistautuminen
-- **bcrypt** — salasanojen hashays
-- **multer** — tiedostojen lähetys
+REST API Node.js/Express application for the Art Club gallery service. Uses MongoDB as the database and Cloudinary for image storage. Fetches weather data via the Open-Meteo API — geocoding converts a city name to coordinates, which are then used to retrieve the current temperature.
 
 ---
 
-## Asennus
+## Technologies
+
+- **Node.js** + **Express** — server
+- **MongoDB** + **Mongoose** — database
+- **Cloudinary** — cloud image storage
+- **JWT** — user authentication
+- **bcrypt** — password hashing
+- **multer** — file uploads
+- **Open-Meteo** — weather data (Geocoding + Forecast API, no API key required)
+
+---
+
+## Installation
 
 ```bash
 git clone https://github.com/vsvala/Art_Club_back.git
@@ -28,45 +29,45 @@ cd Art_Club_back
 npm install
 ```
 
-### Ympäristömuuttujat
+### Environment variables
 
-Luo `.env`-tiedosto projektin juureen:
+Create a `.env` file in the project root:
 
 ```env
-MONGODB_URI=mongodb+srv://<käyttäjä>:<salasana>@<cluster>/artclub
-TEST_MONGODB_URI=mongodb+srv://<käyttäjä>:<salasana>@<cluster>/artclub_test
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub
+TEST_MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub_test
 PORT=3003
-SECRET=<jwt-salainen-avain>
-CLOUDINARY_CLOUD_NAME=<cloudinary-nimi>
-CLOUDINARY_API_KEY=<cloudinary-api-avain>
-CLOUDINARY_API_SECRET=<cloudinary-api-salaisuus>
-SEED_ADMIN_PASSWORD=<admin-salasana>
-SEED_MEMBER_PASSWORD=<member-salasana>
+SECRET=<jwt-secret-key>
+CLOUDINARY_CLOUD_NAME=<cloudinary-name>
+CLOUDINARY_API_KEY=<cloudinary-api-key>
+CLOUDINARY_API_SECRET=<cloudinary-api-secret>
+SEED_ADMIN_PASSWORD=<admin-password>
+SEED_MEMBER_PASSWORD=<member-password>
 ```
 
 ---
 
-## Käynnistys
+## Running the app
 
 ```bash
-# Kehitysmoodi (nodemon, automaattinen uudelleenkäynnistys)
+# Development mode (nodemon, auto-restart)
 npm run dev
 
-# Tuotanto
+# Production
 npm start
 
-# Testit
+# Tests
 npm test
 
-# Siemendataa tietokantaan
+# Seed the database
 npm run seed
 ```
 
 ---
 
-## Arkkitehtuuri
+## Architecture
 
-### Järjestelmärakenne
+### System overview
 
 ```mermaid
 graph TD
@@ -77,10 +78,10 @@ graph TD
 
     Frontend -->|"HTTP REST"| API
     API -->|"Mongoose"| MongoDB
-    API -->|"Kuvan lataus/poisto"| Cloudinary
+    API -->|"Upload/delete image"| Cloudinary
 ```
 
-### Tietokantamalli
+### Database model
 
 ```mermaid
 erDiagram
@@ -110,11 +111,11 @@ erDiagram
         string description
     }
 
-    User ||--o{ Artwork : "omistaa"
-    User ||--o{ Event : "luo"
+    User ||--o{ Artwork : "owns"
+    User ||--o{ Event : "creates"
 ```
 
-### Kuvan lähetys (Multer + Cloudinary)
+### Image upload (Multer + Cloudinary)
 
 ```mermaid
 sequenceDiagram
@@ -124,25 +125,25 @@ sequenceDiagram
 
     Client->>API: POST /api/artworks (multipart/form-data)
     Note right of Client: galleryImage + artwork data
-    API->>API: multer vastaanottaa tiedoston muistiin (buffer)
-    API->>API: fileFilter tarkistaa tiedostotyypin (jpg/png/gif)
-    API->>Cloudinary: upload_stream(buffer) → kansio "artclub"
+    API->>API: multer receives file into memory (buffer)
+    API->>API: fileFilter validates file type (jpg/png/gif)
+    API->>Cloudinary: upload_stream(buffer) → folder "artclub"
     Cloudinary-->>API: secure_url (https://res.cloudinary.com/...)
-    API->>API: Tallennetaan secure_url tietokantaan
+    API->>API: secure_url saved to database
     API-->>Client: 200 { savedArtwork }
 ```
 
-**Miten toimii:**
-- **multer** vastaanottaa `multipart/form-data` -pyynnön ja tallentaa kuvan väliaikaisesti palvelimen muistiin (ei levylle)
-- **fileFilter** hylkää tiedostot jotka eivät ole kuvia (jpg, png, gif)
-- Koodi lähettää muistissa olevan kuvan suoraan Cloudinaryyn `upload_stream`:llä
-- Cloudinary palauttaa pysyvän URL:in joka tallennetaan tietokantaan `galleryImage`-kenttään
-- Frontend käyttää tätä URL:ia suoraan `<img src={artwork.galleryImage} />` — kuva tulee Cloudinaryn CDN:stä
+**How it works:**
+- **multer** receives the `multipart/form-data` request and holds the image in memory (not on disk)
+- **fileFilter** rejects files that are not images (jpg, png, gif)
+- The in-memory buffer is streamed directly to Cloudinary via `upload_stream`
+- Cloudinary returns a permanent URL which is stored in the database as `galleryImage`
+- The frontend uses this URL directly as `<img src={artwork.galleryImage} />` — the image is served from Cloudinary's CDN
 
-**Kuvan poisto:**
-Kun taideteos poistetaan, backend purkaa Cloudinary-URL:ista `public_id`:n ja kutsuu `cloudinary.uploader.destroy()` poistaakseen kuvan myös Cloudinarystä.
+**Image deletion:**
+When an artwork is deleted, the backend extracts the `public_id` from the Cloudinary URL and calls `cloudinary.uploader.destroy()` to remove the image from Cloudinary as well.
 
-### Autentikaatioflow
+### Authentication flow
 
 ```mermaid
 sequenceDiagram
@@ -151,58 +152,58 @@ sequenceDiagram
     participant DB as MongoDB
 
     Client->>API: POST /api/login (username, password)
-    API->>DB: Hae käyttäjä usernamella
-    DB-->>API: Käyttäjädata + passwordHash
+    API->>DB: Find user by username
+    DB-->>API: User data + passwordHash
     API->>API: bcrypt.compare(password, hash)
     API-->>Client: 200 { token, username, role, ... }
 
-    Note over Client,API: Suojatut pyynnöt tokenilla
+    Note over Client,API: Protected requests with token
 
     Client->>API: GET /api/users/mypage
     Note right of Client: Authorization: Bearer token
     API->>API: jwt.verify(token, SECRET)
-    API->>DB: Hae käyttäjä id:llä
-    DB-->>API: Käyttäjädata
-    API-->>Client: 200 Käyttäjädata
+    API->>DB: Find user by id
+    DB-->>API: User data
+    API-->>Client: 200 User data
 ```
 
 ---
 
-## Autentikointi
+## Authentication
 
-API käyttää **JWT Bearer -tokenia**. Kirjautumisen jälkeen token lähetetään jokaisessa pyynnössä Authorization-headerissa:
+The API uses **JWT Bearer tokens**. After login, the token must be sent with every protected request in the Authorization header:
 
 ```
 Authorization: Bearer <token>
 ```
 
-### Roolit
+### Roles
 
-| Rooli | Oikeudet |
+| Role | Permissions |
 |---|---|
-| `member` | Kirjautuneen käyttäjän reitit |
-| `admin` | Kaikki reitit |
+| `member` | Authenticated user routes |
+| `admin` | All routes |
 
 ---
 
-## API-dokumentaatio
+## API documentation
 
-### Kirjautuminen
+### Login
 
-| Metodi | Reitti | Kuvaus | Auth |
+| Method | Route | Description | Auth |
 |---|---|---|---|
-| POST | `/api/login` | Kirjautuminen, palauttaa JWT-tokenin | — |
+| POST | `/api/login` | Log in, returns a JWT token | — |
 
-**Pyyntö:**
+**Request:**
 ```json
-{ "username": "käyttäjänimi", "password": "salasana" }
+{ "username": "username", "password": "password" }
 ```
-**Vastaus:**
+**Response:**
 ```json
 {
   "token": "eyJ...",
-  "username": "käyttäjänimi",
-  "name": "Nimi",
+  "username": "username",
+  "name": "Name",
   "role": "member",
   "id": "...",
   "email": "...",
@@ -212,78 +213,136 @@ Authorization: Bearer <token>
 
 ---
 
-### Käyttäjät `/api/users`
+### Users `/api/users`
 
-| Metodi | Reitti | Kuvaus | Auth |
+| Method | Route | Description | Auth |
 |---|---|---|---|
-| POST | `/api/users` | Rekisteröidy (luo uusi käyttäjä) | — |
-| GET | `/api/users/artists` | Kaikki käyttäjät/taiteilijat | — |
-| GET | `/api/users/artist/:id` | Yksittäinen taiteilija | — |
-| GET | `/api/users/mypage` | Oma profiili | member |
-| GET | `/api/users/admin/:id` | Yksittäinen käyttäjä | member (oma) |
-| GET | `/api/users` | Kaikki käyttäjät | admin |
-| PUT | `/api/users/password` | Vaihda salasana | member |
-| PUT | `/api/users/intro/:id` | Päivitä esittely | member (oma) |
-| PUT | `/api/users/info/:id` | Päivitä käyttäjätiedot | member (oma) |
-| PUT | `/api/users/admin` | Muuta käyttäjän roolia | admin |
-| DELETE | `/api/users/:id` | Poista käyttäjä | admin |
+| POST | `/api/users` | Register (create new user) | — |
+| GET | `/api/users/artists` | All users/artists | — |
+| GET | `/api/users/artist/:id` | Single artist | — |
+| GET | `/api/users/mypage` | Own profile | member |
+| GET | `/api/users/admin/:id` | Single user | member (own) |
+| GET | `/api/users` | All users | admin |
+| PUT | `/api/users/password` | Change password | member |
+| PUT | `/api/users/intro/:id` | Update bio | member (own) |
+| PUT | `/api/users/info/:id` | Update user info | member (own) |
+| PUT | `/api/users/admin` | Change user role | admin |
+| DELETE | `/api/users/:id` | Delete user | admin |
 
-**Rekisteröityminen (POST /api/users):**
+**Registration (POST /api/users):**
 ```json
 {
-  "name": "Nimi",
-  "email": "sahkoposti@example.com",
-  "username": "käyttäjänimi",
-  "password": "salasana123",
+  "name": "Name",
+  "email": "email@example.com",
+  "username": "username",
+  "password": "password123",
   "role": "member"
 }
 ```
-- Salasana vähintään 8 merkkiä
-- Käyttäjänimi täytyy olla uniikki
+- Password must be at least 8 characters
+- Username must be unique
 
 ---
 
-### Taideteokset `/api/artworks`
+### Artworks `/api/artworks`
 
-| Metodi | Reitti | Kuvaus | Auth |
+| Method | Route | Description | Auth |
 |---|---|---|---|
-| GET | `/api/artworks` | Kaikki taideteokset | — |
-| GET | `/api/artworks/:id` | Yksittäinen taideteos | — |
-| POST | `/api/artworks` | Lisää taideteos + kuva | member |
-| PUT | `/api/artworks/:id` | Päivitä tykkäykset | — |
-| DELETE | `/api/artworks/:id` | Poista taideteos | member |
+| GET | `/api/artworks` | All artworks | — |
+| GET | `/api/artworks/:id` | Single artwork | — |
+| POST | `/api/artworks` | Add artwork + image | member |
+| PUT | `/api/artworks/:id` | Update likes | — |
+| DELETE | `/api/artworks/:id` | Delete artwork | member |
 
-**Kuvan lisääminen (POST /api/artworks)** — `multipart/form-data`:
+**Adding an image (POST /api/artworks)** — `multipart/form-data`:
 
-| Kenttä | Tyyppi | Kuvaus |
+| Field | Type | Description |
 |---|---|---|
-| `galleryImage` | tiedosto | Kuva (jpg/png/gif, max 5 MB) |
-| `artist` | teksti | Taiteilijan nimi |
-| `name` | teksti | Teoksen nimi |
-| `year` | numero | Vuosiluku |
-| `size` | teksti | Koko esim. "50x70 cm" |
-| `medium` | teksti | Tekniikka esim. "Öljy kankaalle" |
-| `userId` | teksti | Käyttäjän id |
+| `galleryImage` | file | Image (jpg/png/gif, max 5 MB) |
+| `artist` | text | Artist name |
+| `name` | text | Artwork title |
+| `year` | number | Year |
+| `size` | text | Size e.g. "50x70 cm" |
+| `medium` | text | Medium e.g. "Oil on canvas" |
+| `userId` | text | User id |
 
-Kuva tallennetaan automaattisesti Cloudinaryyn kansioon `artclub`.
+The image is automatically uploaded to Cloudinary under the folder `artclub`.
 
 ---
 
-### Tapahtumat `/api/events`
+### Weather `/api/weather`
 
-| Metodi | Reitti | Kuvaus | Auth |
+| Method | Route | Description | Auth |
 |---|---|---|---|
-| GET | `/api/events` | Kaikki tapahtumat | member |
-| POST | `/api/events` | Luo tapahtuma | admin |
-| DELETE | `/api/events/:id` | Poista tapahtuma | admin |
+| GET | `/api/weather` | Get current temperature for a city | — |
+
+**Query parameters:**
+
+| Parameter | Required | Default | Description |
+|---|---|---|---|
+| `city` | No | `Helsinki` | City name to look up |
+
+**Example request:**
+```
+GET /api/weather?city=Turku
+```
+
+**Example response:**
+```json
+{
+  "city": "Turku",
+  "country": "Finland",
+  "temperature": 18.4
+}
+```
+
+**How it works:**
+
+The endpoint uses two external APIs from [Open-Meteo](https://open-meteo.com/) — both are free and require no API key:
+
+```mermaid
+sequenceDiagram
+    participant Client as Frontend
+    participant API as Express API
+    participant Geo as Open-Meteo Geocoding API
+    participant Weather as Open-Meteo Forecast API
+
+    Client->>API: GET /api/weather?city=Turku
+    API->>Geo: GET /v1/search?name=Turku
+    Geo-->>API: { results: [{ name, country, latitude, longitude }] }
+    API->>Weather: GET /v1/forecast?latitude=...&longitude=...&current=temperature_2m
+    Weather-->>API: { current: { temperature_2m: 18.4 } }
+    API-->>Client: { city, country, temperature }
+```
+
+1. **Geocoding** — the city name is resolved to coordinates (latitude/longitude) via the Open-Meteo Geocoding API. The first result is used.
+2. **Forecast** — the coordinates are passed to the Open-Meteo Forecast API, which returns the current temperature at 2 m above ground (`temperature_2m`).
+
+**Error responses:**
+
+| Status | Meaning |
+|---|---|
+| 404 | City not found in geocoding results |
+| 502 | Weather data unavailable from Open-Meteo |
+| 500 | Unexpected server error |
 
 ---
 
-## Tietokantamallit
+### Events `/api/events`
+
+| Method | Route | Description | Auth |
+|---|---|---|---|
+| GET | `/api/events` | All events | member |
+| POST | `/api/events` | Create event | admin |
+| DELETE | `/api/events/:id` | Delete event | admin |
+
+---
+
+## Database models
 
 ### User
 ```
-name, email, username (uniikki), passwordHash, role (member/admin), intro, artworks[]
+name, email, username (unique), passwordHash, role (member/admin), intro, artworks[]
 ```
 
 ### Artwork
@@ -298,74 +357,74 @@ eventImage, title, place, start, end, description, user (ref)
 
 ---
 
-## Tietoturva ja ylläpito
+## Security & maintenance
 
-### Haavoittuvuuksien tarkistus
+### Vulnerability audit
 
 ```bash
-# Tarkista TUOTANNON haavoittuvuudet (tärkein komento)
+# Check PRODUCTION vulnerabilities (most important)
 npm audit --omit=dev
 
-# Tarkista kaikki mukaan lukien dev-riippuvuudet
+# Check everything including dev dependencies
 npm audit
 ```
 
-> **Huom:** `npm audit` näyttää myös dev-riippuvuuksien (jest, eslint) haavoittuvuudet jotka eivät vaikuta tuotantoon. Tarkista aina erikseen `--omit=dev`.
+> **Note:** `npm audit` also shows vulnerabilities in dev dependencies (jest, eslint) that do not affect production. Always check separately with `--omit=dev`.
 
-### Automaattiset korjaukset
+### Automatic fixes
 
 ```bash
-# Korjaa turvalliset päivitykset automaattisesti (ei breaking changeja)
+# Fix safe updates automatically (no breaking changes)
 npm audit fix
 
-# Näytä mitä --force tekisi ENNEN ajamista
+# Preview what --force would do BEFORE running it
 npm audit fix --force --dry-run
 
-# VARO: --force voi tehdä odottamattomia downgrade-päivityksiä
-# Aja vain jos tiedät mitä teet
+# WARNING: --force can cause unexpected downgrades
+# Only run if you know what you're doing
 npm audit fix --force
 ```
 
-### Vanhentuneiden pakettien tarkistus
+### Checking for outdated packages
 
 ```bash
 npm outdated
 ```
 
-| Sarake | Merkitys |
+| Column | Meaning |
 |---|---|
-| Current | Tällä hetkellä asennettu versio |
-| Wanted | Suurin sallittu versio package.json:n mukaan |
-| Latest | Viimeisin saatavilla oleva versio npm:ssä |
+| Current | Currently installed version |
+| Wanted | Maximum allowed version per package.json |
+| Latest | Latest available version on npm |
 
-### Pakettien päivitys
+### Updating packages
 
 ```bash
-# Päivitä kaikki paketit sallituissa rajoissa (ei major-hyppyjä)
+# Update all packages within allowed ranges (no major bumps)
 npm update
 
-# Päivitä yksittäinen paketti uusimpaan
-npm install paketinnimi@latest
+# Update a single package to latest
+npm install packagename@latest
 
-# Tarkista mitä on asennettu
-npm ls paketinnimi
+# Check what is installed
+npm ls packagename
 ```
 
-### Suositeltu ylläpitorutiini
+### Recommended maintenance routine
 
-| Väli | Toimenpide |
+| Interval | Action |
 |---|---|
-| Kuukausittain | `npm audit --omit=dev` — tarkista tuotannon haavoittuvuudet |
-| Kvartaaleittain | `npm outdated` — harkitse päivityksiä |
-| Major-päivitykset | Tee aina erikseen omana haarana, testaa huolellisesti |
+| Monthly | `npm audit --omit=dev` — check production vulnerabilities |
+| Quarterly | `npm outdated` — consider updates |
+| Major updates | Always do in a separate branch, test thoroughly |
 
-### Projektin erityishuomiot
+### Project-specific notes
 
 **`.npmrc` — `legacy-peer-deps=true`**
-Tarvitaan koska `multer-storage-cloudinary@4` ilmoittaa tukevansa vain `cloudinary@v1`, vaikka `cloudinary@v2` toimii. Ilman tätä `npm install` kaatuu virheeseen.
+Required because `multer-storage-cloudinary@4` declares support only for `cloudinary@v1`, even though `cloudinary@v2` works fine. Without this flag, `npm install` fails with a peer dependency error.
 
 **`package.json` — `overrides.tar`**
-Pakottaa `tar`-paketin turvalliseen v7-versioon koko riippuvuuspuussa. Syy: `bcrypt` → `@mapbox/node-pre-gyp` -ketju käyttää muutoin haavoittuvaa tar-versiota, johon ei ole korjausta 6.x-linjassa.
+Forces the `tar` package to the safe v7 version throughout the dependency tree. Reason: the `bcrypt` → `@mapbox/node-pre-gyp` chain otherwise pulls in a vulnerable version of `tar` for which no fix exists in the 6.x line.
 
-**Jest-haavoittuvuudet**
-`npm audit` näyttää ~17 moderate-tason haavoittuvuutta jest:n sisäisissä riippuvuuksissa (`babel-plugin-istanbul` → `js-yaml`). Nämä ovat tunnettuja eivätkä vaikuta tuotantoon. `npm audit --omit=dev` → 0 haavoittuvuutta.
+**Jest vulnerabilities**
+`npm audit` reports ~17 moderate-severity vulnerabilities inside Jest's internal dependencies (`babel-plugin-istanbul` → `js-yaml`). These are known issues and do not affect production. `npm audit --omit=dev` → 0 vulnerabilities.
