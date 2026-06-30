@@ -123,12 +123,16 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
 
     const artwork = await Artwork.findByIdAndDelete(req.params.id);
     if (artwork && artwork.galleryImage) {
-      const urlParts = artwork.galleryImage.split("/");
-      const filenameWithExt = urlParts[urlParts.length - 1];
-      const filename = filenameWithExt.split(".")[0];
-      const folder = urlParts[urlParts.length - 2];
-      const publicId = `${folder}/${filename}`;
-      await cloudinary.uploader.destroy(publicId);
+      try {
+        const urlParts = artwork.galleryImage.split("/");
+        const filenameWithExt = urlParts[urlParts.length - 1];
+        const filename = filenameWithExt.split(".")[0];
+        const folder = urlParts[urlParts.length - 2];
+        const publicId = `${folder}/${filename}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryError) {
+        console.log("Cloudinary delete failed:", cloudinaryError.message);
+      }
     }
     res.status(204).end();
   } catch (exception) {
