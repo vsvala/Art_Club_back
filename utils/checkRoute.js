@@ -21,6 +21,9 @@ const authenticateToken = (req) => {
 };
 
 //Checks that the logged in user is accessing methods meant for him/her with  request param id
+const isAuthError = (error) =>
+  error.name === "JsonWebTokenError" || error.message === "token missing";
+
 const checkUser = (req, res, next) => {
   try {
     const token = authenticateToken(req);
@@ -31,20 +34,7 @@ const checkUser = (req, res, next) => {
 
     next();
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      res.status(401).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "internal server error" });
-    }
-  }
-};
-//Checks that the user is logged in
-const checkLogin = (req, res, next) => {
-  try {
-    const token = authenticateToken(req);
-    next();
-  } catch (error) {
-    if (error.name === "JsonWebTokenError") {
+    if (isAuthError(error)) {
       res.status(401).json({ error: error.message });
     } else {
       res.status(500).json({ error: "internal server error" });
@@ -52,7 +42,19 @@ const checkLogin = (req, res, next) => {
   }
 };
 
-//Checks if the logged in user is an admin
+const checkLogin = (req, res, next) => {
+  try {
+    authenticateToken(req);
+    next();
+  } catch (error) {
+    if (isAuthError(error)) {
+      res.status(401).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "internal server error" });
+    }
+  }
+};
+
 const checkAdmin = (req, res, next) => {
   try {
     const token = authenticateToken(req);
@@ -63,7 +65,7 @@ const checkAdmin = (req, res, next) => {
 
     next();
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
+    if (isAuthError(error)) {
       res.status(401).json({ error: error.message });
     } else {
       res.status(500).json({ error: "internal server error" });
