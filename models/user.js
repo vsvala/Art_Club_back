@@ -1,32 +1,33 @@
-const mongoose =require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator')
+const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 
-
-const userSchema =mongoose.Schema({
-  name:String,
-  email:String,
-  username:
-  {
-    type:String,
-    unique:true
+const userSchema = mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
   },
-  passwordHash:
-  { type:String,
-    required:true
+  email: {
+    type: String,
+    required: true,
   },
-  role:String,
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  passwordHash: { type: String, required: true },
+  role: { type: String, required: true },
 
-  intro:String,
+  intro: String,
 
-  artworks:[
+  artworks: [
     {
-      type:mongoose.Schema.Types.ObjectId,
-      ref:'Artwork'
-    }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Artwork",
+    },
   ],
-}
-)
-userSchema.plugin(uniqueValidator)
+});
+userSchema.plugin(uniqueValidator);
 
 // userSchema.statics.format = (user) => {
 //   return {
@@ -37,16 +38,15 @@ userSchema.plugin(uniqueValidator)
 //   }
 // }
 
-userSchema.set('toJSON', {
+userSchema.set("toJSON", {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-    delete returnedObject.passwordHash //filter passwordHasoh to invisible
-  }
-})
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+    delete returnedObject.passwordHash; //filter passwordHasoh to invisible
+  },
+});
 
+const User = mongoose.model("User", userSchema);
 
-const User =mongoose.model('User', userSchema)
-
-module.exports=User
+module.exports = User;
