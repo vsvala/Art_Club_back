@@ -3,7 +3,6 @@ const multer = require("multer");
 const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-//const { authenticateToken } = require('../utils/checkRoute')
 const { checkLogin, checkAdmin } = require("../utils/checkRoute");
 
 //multer saves image to folder

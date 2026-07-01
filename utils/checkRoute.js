@@ -100,6 +100,5 @@ module.exports = {
   checkLogin,
   checkAdmin,
   checkUser,
-  getTokenFrom,
   authenticateToken,
 };

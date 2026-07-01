@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const usersRouter = require("express").Router();
 const User = require("../models/user");
 const logger = require("../utils/logger");
-//const jwt = require('jsonwebtoken')
 const {
   checkAdmin,
   authenticateToken,
@@ -176,7 +175,6 @@ usersRouter.put("/password", checkLogin, async (req, res) => {
 
 //Updates user's introduction text with spesific id
 usersRouter.put("/intro/:id", checkUser, async (req, res) => {
-  const body = req.body;
   try {
     let updatedUser = await User.findById(req.params.id);
     await User.findByIdAndUpdate(req.params.id, { intro: req.body.intro });
