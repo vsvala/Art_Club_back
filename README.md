@@ -99,7 +99,7 @@ GitHub Actions runs automatically on pushes and pull requests to `master` with t
 | ------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ci-build-and-test` | every push / PR                                   | installs deps (`npm ci`), runs lint, runs tests against a local MongoDB service container, runs `npm audit --audit-level=high`                                                            |
 | `docker-publish`    | push to `master` only (after `ci-build-and-test`) | downloads the frontend build artifact from [Art_Club](https://github.com/vsvala/Art_Club), logs in to GHCR, builds and pushes `ghcr.io/vsvala/artclub-backend:latest`                     |
-| `deploy`            | push to `master` only (not `#skip`)               | triggers a Render deploy hook, then polls `/api/health` with up to 10 retries (15 s apart, 10 s timeout per request) — fails the job if the server does not respond 200 within ~3 minutes |
+| `deploy`            | push to `master` only (not `#skip`)               | triggers a Render deploy hook, then polls `/api/health` every 15 s for up to 20 attempts (5 min total) — fails the job if the server does not respond 200 |
 | `tag_release`       | after successful `ci-build-and-test` + `deploy`   | auto-bumps the patch version tag via `anothrNick/github-tag-action`                                                                                                                       |
 
 ### Health check
