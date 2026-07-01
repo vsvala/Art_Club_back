@@ -4,6 +4,7 @@ const path = require("path");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
+const rateLimit = require("express-rate-limit");
 
 //Routrers
 const usersRouter = require("./controllers/users");
@@ -14,11 +15,15 @@ const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minuutin ikkuna
+  max: 10, // max 10 yritystä per IP
+  message: { error: "Too many login attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 logger.info("connecting to", config.MONGODB_URI);
-
-// connecting to db throught config file
-//console.log('commecting to', config.MONGODB_URI)
-
 mongoose
   .connect(config.MONGODB_URI)
   .then(() => {
@@ -42,7 +47,7 @@ const apiUrl = "/api";
 app.use(`${apiUrl}/users`, usersRouter);
 app.use(`${apiUrl}/artworks`, artworksRouter);
 app.use(`${apiUrl}/events`, eventsRouter);
-app.use(`${apiUrl}/login`, loginRouter);
+app.use(`${apiUrl}/login`, loginLimiter, loginRouter);
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 
 app.get("/api/weather", async (req, res) => {
@@ -88,7 +93,6 @@ app.get("/api/weather", async (req, res) => {
     // console.error("Weather error:", error);
     res.status(500).json({
       error: `Failed to fetch weather data: ${error.message}`,
-      stack: error.stack,
     });
   }
 });

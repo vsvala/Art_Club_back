@@ -3,8 +3,13 @@ const multer = require("multer");
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const { checkLogin } = require("../utils/checkRoute");
 const cloudinary = require("cloudinary").v2;
+const {
+  checkAdmin,
+  authenticateToken,
+  checkUser,
+  checkLogin,
+} = require("../utils/checkRoute");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -38,7 +43,7 @@ const uploadToCloudinary = (buffer, mimetype) =>
       (error, result) => {
         if (error) reject(error);
         else resolve(result.secure_url);
-      }
+      },
     );
     stream.end(buffer);
   });
@@ -79,7 +84,10 @@ artworksRouter.post(
     const body = req.body;
     try {
       const user = await User.findById(body.userId);
-      const imageUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+      const imageUrl = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.mimetype,
+      );
 
       const artwork = new Artwork({
         galleryImage: imageUrl,
@@ -105,8 +113,19 @@ artworksRouter.post(
 // deletes artwork url and image file from uploads folder
 artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
   try {
-    const artwork = await Artwork.findByIdAndDelete(req.params.id);
-    if (artwork && artwork.galleryImage) {
+    const artwork = await Artwork.findById(req.params.id);
+    if (!artwork) {
+      return res.status(404).json({ error: "artwork not found" });
+    }
+
+    const token = authenticateToken(req);
+    if (artwork.user.toString() !== token.id.toString()) {
+      return res.status(403).json({ error: "forbidden" });
+    }
+
+    await Artwork.findByIdAndDelete(req.params.id);
+
+    if (artwork.galleryImage) {
       try {
         const urlParts = artwork.galleryImage.split("/");
         const filenameWithExt = urlParts[urlParts.length - 1];

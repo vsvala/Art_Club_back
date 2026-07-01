@@ -83,6 +83,31 @@ test("taideteos poistetaan kirjautuneena käyttäjänä", async () => {
   expect(after.body).toHaveLength(0);
 });
 
+test("taideteoksen poisto epäonnistuu toisen käyttäjän tokenilla", async () => {
+  // Luo toinen käyttäjä ja kirjaudu sillä
+  const passwordHash = await bcrypt.hash("salasana123", 10);
+  await User.create({
+    name: "Toinen",
+    email: "toinen@example.com",
+    username: "toinenkayttaja",
+    passwordHash,
+    role: "member",
+  });
+  const loginRes = await api
+    .post("/api/login")
+    .send({ username: "toinenkayttaja", password: "salasana123" });
+  const otherToken = loginRes.body.token;
+
+  // Yritä poistaa ensimmäisen käyttäjän teos
+  const artworks = await api.get("/api/artworks");
+  const id = artworks.body[0].id;
+
+  await api
+    .delete(`/api/artworks/${id}`)
+    .set("Authorization", `Bearer ${otherToken}`)
+    .expect(403);
+});
+
 test("taideteoksen poisto epäonnistuu ilman tokenia", async () => {
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;
