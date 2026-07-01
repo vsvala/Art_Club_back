@@ -21,7 +21,7 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/png" ||
-    file.mimetype === "image/pdf" ||
+    file.mimetype === "application/pdf" ||
     file.mimetype === "image/gif"
   ) {
     cb(null, true);
@@ -84,6 +84,9 @@ artworksRouter.post(
     const body = req.body;
     try {
       const user = await User.findById(body.userId);
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
       const imageUrl = await uploadToCloudinary(
         req.file.buffer,
         req.file.mimetype,
