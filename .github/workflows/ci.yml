@@ -74,7 +74,7 @@ jobs:
           tags: ghcr.io/vsvala/artclub-backend:latest
 
   deploy:
-    needs: [ci-build-and-test]
+    needs: [ci-build-and-test, docker-publish]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')
     steps:
@@ -84,10 +84,17 @@ jobs:
       - name: Health check
         run: |
           echo "Waiting for deployment to be ready..."
-          sleep 30
-          curl --fail --retry 10 --retry-delay 15 --retry-connrefused \
-            --max-time 10 --connect-timeout 5 \
-            ${{ secrets.RENDER_APP_URL }}/api/health
+          for i in $(seq 1 20); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --connect-timeout 5 ${{ secrets.RENDER_APP_URL }}/api/health)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Health check failed after 20 attempts"
+          exit 1
   # Rollback is done manually from render.com UI--> Rollback to this deploy
   # --- Vaihe : Tag release ---
   # Luo automaattisesti uuden patch-version tagin onnistuneen deployn jälkeen
