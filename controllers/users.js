@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const usersRouter = require("express").Router();
 const User = require("../models/user");
+const logger = require("../utils/logger");
 //const jwt = require('jsonwebtoken')
 const {
   checkAdmin,
@@ -23,7 +24,7 @@ usersRouter.get("/", checkAdmin, async (req, res) => {
     //res.json(users.map(u => u.toJSON()))
     res.status(200).json(users);
   } catch (exception) {
-    console.log(exception.message);
+    logger.error(exception.message);
     res.status(400).json({ error: "Could not get users from db" });
   }
 });
@@ -42,7 +43,7 @@ usersRouter.get("/artists", async (req, res) => {
     //res.json(users.map(u => u.toJSON()))
     res.status(200).json(users);
   } catch (exception) {
-    console.log(exception.message);
+    logger.error(exception.message);
     res.status(400).json({ error: "Could not get artists from db" });
   }
 });
@@ -57,7 +58,7 @@ usersRouter.get("/admin/:id", checkUser, async (req, res) => {
       res.status(404).end();
     }
   } catch (exception) {
-    console.log(exception.message);
+    logger.error(exception.message);
     res
       .status(400)
       .json({ error: "malformatted id, Could not get singleUser from db" });
@@ -74,7 +75,7 @@ usersRouter.get("/artist/:id", async (req, res) => {
       res.status(404).end();
     }
   } catch (exception) {
-    console.log(exception.message);
+    logger.error(exception.message);
     res
       .status(400)
       .json({ error: "malformatted id, Could not get singleUser from db" });
@@ -84,7 +85,6 @@ usersRouter.get("/artist/:id", async (req, res) => {
 usersRouter.get("/mypage", checkLogin, async (req, res, next) => {
   try {
     const token = authenticateToken(req);
-    console.log("token", token);
     const user = await User.findById(token.id)
       // const user = await User.findById(req.params.id)
       .populate("artworks");
@@ -112,10 +112,8 @@ usersRouter.post("/", async (req, res) => {
         .status(400)
         .json({ error: "password must have at least 8 letters" });
     }
-    //console.log('bodypassword', body.password)
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(body.password, saltRounds);
-    //console.log('passwordhash',  passwordHash)
     const user = new User({
       name: body.name,
       email: body.email,
@@ -123,11 +121,10 @@ usersRouter.post("/", async (req, res) => {
       passwordHash,
       role: "nonMember", // // ← important !!! backend asettaa aina itse, ei req.body.role ettei kukaan pääse hyökkäämään
     });
-    console.log("user", user);
     const savedUser = await user.save();
     res.json(savedUser.toJSON());
   } catch (exception) {
-    console.log(exception);
+    logger.error(exception.message);
     res
       .status(500)
       .json({ error: "did not save user, something went wrong..." });
@@ -158,25 +155,21 @@ usersRouter.put("/admin", checkAdmin, async (req, res) => {
 
 //Update password, for logged users
 usersRouter.put("/password", checkLogin, async (req, res) => {
-  //console.log('body',req.body)
   try {
     const body = req.body;
     const token = authenticateToken(req);
-    //console.log('token', token)
     const user = await User.findById(token.id);
     if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
       const saltRounds = 10;
       const newPasswordHash = await bcrypt.hash(body.newPassword, saltRounds);
       user.passwordHash = newPasswordHash;
       await user.save();
-      //console.log('password updated')
       res.status(200).end();
     } else {
-      console.log("old password does not match");
       res.status(400).json({ error: "old password does not match" });
     }
   } catch (error) {
-    console.log(error.message);
+    logger.error(error.message);
     res.status(400).json({ error: "bad req" });
   }
 });
@@ -184,15 +177,12 @@ usersRouter.put("/password", checkLogin, async (req, res) => {
 //Updates user's introduction text with spesific id
 usersRouter.put("/intro/:id", checkUser, async (req, res) => {
   const body = req.body;
-  console.log("body", body);
   try {
     let updatedUser = await User.findById(req.params.id);
-    // console.log('uptadedUser', updatedUser)
     await User.findByIdAndUpdate(req.params.id, { intro: req.body.intro });
     res.json(updatedUser.toJSON());
-    // console.log('updated', updatedUser)
   } catch (exception) {
-    console.log(exception);
+    logger.error(exception.message);
     res
       .status(500)
       .json({ error: "did not update introduction, something went wrong..." });
@@ -202,20 +192,16 @@ usersRouter.put("/intro/:id", checkUser, async (req, res) => {
 //Updates user information
 usersRouter.put("/info/:id", checkUser, async (req, res) => {
   const body = req.body;
-  //console.log('body', body)
-  console.log("bodyId", body.id);
   try {
     let updatedUser = await User.findById(body.id);
-    //console.log('uptadedUser', updatedUser)
     await User.findByIdAndUpdate(body.id, {
       name: req.body.name,
       email: req.body.email,
       username: req.body.username,
     });
     res.json(updatedUser.toJSON());
-    //console.log('updated', updatedUser)
   } catch (exception) {
-    console.log(exception);
+    logger.error(exception.message);
     res
       .status(500)
       .json({ error: "did not update information, something went wrong..." });
@@ -228,13 +214,8 @@ usersRouter.delete("/:id", checkAdmin, async (req, res) => {
     await User.findByIdAndRemove(req.params.id);
     res.status(204).end();
   } catch (exception) {
-    console.log(exception);
+    logger.error(exception.message);
     res.status(400).json({ error: "bad req" });
   }
 });
-// // heroku reload page fix
-// usersRouter.get('/*', async(req, res) => {
-//   await res.sendFile('/index.html')
-// })
-
 module.exports = usersRouter;

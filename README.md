@@ -99,7 +99,37 @@ GitHub Actions runs automatically on pushes and pull requests to `master` with t
 | `deploy`            | push to `master` only (not `#skip`) | triggers a Render deploy hook, then polls `/api/health` with up to 10 retries (15 s apart, 10 s timeout per request) — fails the job if the server does not respond 200 within ~3 minutes |
 | `tag_release`       | after successful deploy             | auto-bumps the patch version tag via `anothrNick/github-tag-action`                                                                                                                       |
 
-quick healt test in terminal: curl http://localhost:3001/api/health
+### Health check
+
+`GET /api/health` — returns HTTP 200 when the server is running and MongoDB is connected:
+
+```json
+{ "status": "ok", "db": "connected", "uptime": 42 }
+```
+
+If MongoDB is not connected, returns HTTP 503:
+
+```json
+{ "status": "error", "db": "disconnected" }
+```
+
+Quick test in terminal:
+
+```bash
+curl http://localhost:3001/api/health
+```
+
+### Logging
+
+All request and error logging goes through `utils/logger.js` (wraps `console.log`/`console.error`, silent during tests).
+
+Every HTTP request is logged by `requestLogger` middleware with method, path, status code, and response time:
+
+```
+GET /api/artworks 200 43ms
+```
+
+Passwords are masked in logs (`***`) so credentials never appear in plaintext. Errors in route handlers use `logger.error`. Unsupported file upload types are logged as errors.
 
 ### Rollback
 
@@ -169,3 +199,4 @@ Detailed architecture diagrams and flow notes are available in [docs/architectur
 - Enforce ownership checks on user- and artwork-specific mutations.
 - Strengthen upload validation beyond MIME type checks.
 - Add audit logging for admin actions and security-relevant events.
+- Add Sentry error tracking for production error visibility

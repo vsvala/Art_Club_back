@@ -2,18 +2,17 @@ const eventsRouter = require("express").Router();
 const multer = require("multer");
 const Event = require("../models/event");
 const User = require("../models/user");
+const logger = require("../utils/logger");
 //const { authenticateToken } = require('../utils/checkRoute')
 const { checkLogin, checkAdmin } = require("../utils/checkRoute");
 
 //multer saves image to folder
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads/"); //./public
-    console.log("storage");
+    cb(null, "./uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + file.originalname);
-    console.log("filename");
   },
 });
 //rejects storing a file if not image
@@ -25,9 +24,8 @@ const fileFilter = (req, file, cb) => {
     file.mimetype === "image/gif"
   ) {
     cb(null, true);
-    console.log("mimetype true");
   } else {
-    console.log("not supportet format");
+    logger.error(`Rejected file upload: unsupported mimetype ${file.mimetype}`);
     cb(null, false);
   }
 };
@@ -58,17 +56,7 @@ eventsRouter.post(
   checkAdmin,
   upload.single("eventImage"),
   async (req, res) => {
-    console.log("reqfile", req.file);
     const body = req.body;
-    console.log("eventbody", body.userId);
-
-    console.log("routerista", body.config);
-    console.log("routerista headers", req.headers);
-    console.log("routeristadata", req.file.path);
-    /*   AUTORISOINTI
-  const decodedToken = authenticateToken(req)
-  const user =  User.findById(decodedToken.id)//await
- */
     try {
       const user = await User.findById(body.userId);
 
@@ -82,12 +70,9 @@ eventsRouter.post(
         user: user,
       });
       const savedEvent = await event.save();
-      console.log("savedEvent", savedEvent);
-      //user.events = await user.events.concat(savedEvent)
-      //await user.save()
       res.status(200).json(savedEvent);
     } catch (error) {
-      console.log(error.message);
+      logger.error(error.message);
       res.status(400).json({ error: "bad req" });
     }
   },
@@ -97,14 +82,13 @@ eventsRouter.post(
 eventsRouter.delete("/:id", checkAdmin, async (req, res, next) => {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
-    console.log(" artwork.eventImage", event.eventImage);
     const fs = require("fs");
     const filePath = "./" + event.eventImage;
     fs.access(filePath, (error) => {
       if (!error) {
         fs.unlinkSync(filePath);
       } else {
-        console.log(error);
+        logger.error(error.message);
       }
     });
     res.status(204).end();
@@ -112,12 +96,5 @@ eventsRouter.delete("/:id", checkAdmin, async (req, res, next) => {
     next(exception);
   }
 });
-
-// // heroku reload page fix
-// eventsRouter.get('/*', async(req, res) => {
-// // await res.sendFile('/build/index.html')
-//   await res.sendFile('/build/public/index.html', { root: __dirname })
-
-// })
 
 module.exports = eventsRouter;

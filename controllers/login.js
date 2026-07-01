@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const User = require('../models/user')
 const config = require('../utils/config')
+const logger = require('../utils/logger')
 
 
 loginRouter.post('/', async (req, res) => {
@@ -31,7 +32,7 @@ loginRouter.post('/', async (req, res) => {
       .send({ token, username: user.username, name: user.name, role: user.role, id:user.id, email:user.email, intro:user.intro })
   }
   catch (error) {
-    console.log(error.message)
+    logger.error(error.message)
     return res.status(500).json({ error: 'authentication error' })
   }
 })

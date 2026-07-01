@@ -2,6 +2,7 @@ const artworksRouter = require("express").Router();
 const multer = require("multer");
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
+const logger = require("../utils/logger");
 const { checkLogin } = require("../utils/checkRoute");
 const cloudinary = require("cloudinary").v2;
 
@@ -75,15 +76,7 @@ artworksRouter.post(
   checkLogin,
   upload.single("galleryImage"),
   async (req, res) => {
-    //console.log('reqfile', req.file)
     const body = req.body;
-    // console.log('artworkbody', body.userId)
-    // console.log('routerista',body.config)
-    // console.log('routerista headers',req.headers)
-    // console.log('routeristadata',req.file.path)
-    //const decodedToken = authenticateToken(req)
-    //const user =  User.findById(decodedToken.id)
-
     try {
       const user = await User.findById(body.userId);
       const imageUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
@@ -97,17 +90,13 @@ artworksRouter.post(
         medium: req.body.medium,
         likes: req.body.likes === "" ? false : req.body.likes === 0,
         user: req.body.userId,
-        //user: user._id,
       });
       const savedArtwork = await artwork.save();
-      console.log("savedartwolrid", savedArtwork);
-      //TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO id vai artwork
-      //savedArtwork.id
       user.artworks = await user.artworks.concat(savedArtwork.id);
       await user.save();
       res.status(200).json(savedArtwork);
     } catch (error) {
-      console.log(error.message);
+      logger.error(error.message);
       res.status(400).json({ error: "bad req" });
     }
   },
@@ -116,11 +105,6 @@ artworksRouter.post(
 // deletes artwork url and image file from uploads folder
 artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
   try {
-    //const decodedToken = authenticateToken(req)
-    //console.log('decoderdT',decodedToken)
-    // const user = await User.findById(decodedToken.id)
-    // console.log('user',user)
-
     const artwork = await Artwork.findByIdAndDelete(req.params.id);
     if (artwork && artwork.galleryImage) {
       try {
@@ -131,7 +115,7 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
         const publicId = `${folder}/${filename}`;
         await cloudinary.uploader.destroy(publicId);
       } catch (cloudinaryError) {
-        console.log("Cloudinary delete failed:", cloudinaryError.message);
+        logger.error(`Cloudinary delete failed: ${cloudinaryError.message}`);
       }
     }
     res.status(204).end();
@@ -142,24 +126,16 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
 
 //update likes
 artworksRouter.put("/:id", async (req, res) => {
-  // const body = req.body
-  console.log("bodyId", req.body.id);
   try {
-    //const artwork = await Artwork.findById(req.params.id)
     const artwork = await Artwork.findById(req.body.id);
     await Artwork.findByIdAndUpdate(req.body.id, { likes: req.body.likes });
     res.json(artwork.toJSON());
   } catch (exception) {
-    console.log(exception);
+    logger.error(exception.message);
     res
       .status(500)
       .json({ error: "did not update likes, something went wrong..." });
   }
-});
-
-// heroku reload page fix
-artworksRouter.get("/*", (req, res) => {
-  res.sendFile("../build/index.html", { root: __dirname });
 });
 
 module.exports = artworksRouter;

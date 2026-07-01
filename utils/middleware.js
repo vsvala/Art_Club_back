@@ -1,10 +1,15 @@
 const logger = require('./logger')
 
 const requestLogger = (request, response, next) => {
-  logger.info('Method:', request.method)
-  logger.info('Path:  ', request.path)
-  logger.info('Body:  ', request.body)
-  logger.info('---')
+  const start = Date.now()
+  const body = { ...request.body }
+  if (body.password) body.password = '***'
+
+  response.on('finish', () => {
+    const duration = Date.now() - start
+    logger.info(`${request.method} ${request.path} ${response.statusCode} ${duration}ms`, body)
+  })
+
   next()
 }
 

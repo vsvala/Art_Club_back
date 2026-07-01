@@ -22,8 +22,7 @@
     "test": "NODE_ENV=test jest --verbose --runInBand",
     "lint": "eslint .",
     "codecov": "node_modules/.bin/codecov",
-    "deploy": "git push heroku master",
-    "logs:prod": "heroku logs --tail",
+    "deploy": "git push origin master",
     "seed": "node seed.js"
   },
   "dependencies": {
