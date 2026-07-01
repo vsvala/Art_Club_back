@@ -95,7 +95,16 @@ app.get("/api/weather", async (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  const dbState = mongoose.connection.readyState;
+  // 1 = connected, anything else = not ready
+  if (dbState !== 1) {
+    return res.status(503).json({ status: "error", db: "disconnected" });
+  }
+  res.status(200).json({
+    status: "ok",
+    db: "connected",
+    uptime: Math.floor(process.uptime()),
+  });
 });
 
 // Serve React app for all non-API routes so browser refresh works on any path
