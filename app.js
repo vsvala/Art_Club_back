@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
-const rateLimit = require("express-rate-limit");
+const { loginLimiter } = require("./utils/limiters");
 
 //Routrers
 const usersRouter = require("./controllers/users");
@@ -14,14 +14,6 @@ const artworksRouter = require("./controllers/artworks");
 const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
-
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuutin ikkuna
-  max: 10, // max 10 yritystä per IP
-  message: { error: "Too many login attempts, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 logger.info("connecting to", config.MONGODB_URI);
 mongoose

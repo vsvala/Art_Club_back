@@ -8,6 +8,7 @@ const {
   checkUser,
   checkLogin,
 } = require("../utils/checkRoute");
+const { registerLimiter, passwordLimiter } = require("../utils/limiters");
 
 // get all users, only for admin
 usersRouter.get("/", checkAdmin, async (req, res) => {
@@ -98,7 +99,7 @@ usersRouter.get("/mypage", checkLogin, async (req, res, next) => {
 });
 
 //Creates user when registering
-usersRouter.post("/", async (req, res) => {
+usersRouter.post("/", registerLimiter, async (req, res) => {
   try {
     const body = req.body;
     // check that username does not exist and password length is<8
@@ -153,7 +154,7 @@ usersRouter.put("/admin", checkAdmin, async (req, res) => {
 });
 
 //Update password, for logged users
-usersRouter.put("/password", checkLogin, async (req, res) => {
+usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
   try {
     const body = req.body;
     const token = authenticateToken(req);
