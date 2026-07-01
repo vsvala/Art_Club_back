@@ -209,7 +209,7 @@ usersRouter.put("/info/:id", checkUser, async (req, res) => {
 // delete user, only for admin
 usersRouter.delete("/:id", checkAdmin, async (req, res) => {
   try {
-    await User.findByIdAndRemove(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
     res.status(204).end();
   } catch (exception) {
     logger.error(exception.message);
