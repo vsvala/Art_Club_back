@@ -55,7 +55,6 @@ eventsRouter.get("/", checkLogin, async (req, res) => {
     });
     res.json(events.map((event) => event.toJSON()));
   } catch (exception) {
-    console.log(exception.message);
     res.status(400).json({ error: "Could not get eventList from db" });
   }
 });
@@ -99,7 +98,7 @@ eventsRouter.delete("/:id", checkAdmin, async (req, res, next) => {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
     if (!event) {
-      return res.status(404).json({ error: "artwork not found" });
+      return res.status(404).json({ error: "Event not found" });
     }
     if (event.eventImage) {
       try {

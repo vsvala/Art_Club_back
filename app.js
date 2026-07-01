@@ -63,18 +63,14 @@ app.get("/api/weather", async (req, res) => {
     if (!geoData.results || geoData.results.length === 0) {
       return res.status(404).json({ error: `City "${city}" not found` });
     }
-
     const place = geoData.results[0];
-
     // console.log("place.latitude", place.latitude);
     // console.log("place.longitude", place.longitude);
 
     const weather = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code`,
     );
-
     const weatherData = await weather.json();
-    console.log("weatherdata", weatherData);
 
     if (
       !weatherData.current ||

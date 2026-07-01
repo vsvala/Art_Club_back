@@ -176,14 +176,17 @@ usersRouter.put("/password", checkLogin, async (req, res) => {
 //Updates user's introduction text with spesific id
 usersRouter.put("/intro/:id", checkUser, async (req, res) => {
   try {
-    let updatedUser = await User.findById(req.params.id);
-    await User.findByIdAndUpdate(req.params.id, { intro: req.body.intro });
+    let updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { intro: req.body.intro },
+      { new: true },
+    );
     res.json(updatedUser.toJSON());
   } catch (exception) {
     logger.error(exception.message);
-    res
-      .status(500)
-      .json({ error: "did not update introduction, something went wrong..." });
+    res.status(500).json({
+      error: "did not update introduction, something went wrong...",
+    });
   }
 });
 
@@ -191,12 +194,15 @@ usersRouter.put("/intro/:id", checkUser, async (req, res) => {
 usersRouter.put("/info/:id", checkUser, async (req, res) => {
   const body = req.body;
   try {
-    let updatedUser = await User.findById(body.id);
-    await User.findByIdAndUpdate(body.id, {
-      name: req.body.name,
-      email: req.body.email,
-      username: req.body.username,
-    });
+    let updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        email: req.body.email,
+        username: req.body.username,
+      },
+      { new: true },
+    );
     res.json(updatedUser.toJSON());
   } catch (exception) {
     logger.error(exception.message);

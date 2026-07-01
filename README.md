@@ -227,6 +227,5 @@ Detailed architecture diagrams and flow notes are available in [docs/architectur
 
 - Add rate limiting to login and other sensitive endpoints.
 - Enforce ownership checks on user- and artwork-specific mutations.
-- Strengthen upload validation beyond MIME type checks.
 - Add audit logging for admin actions and security-relevant events.
 - Add Sentry error tracking for production error visibility
