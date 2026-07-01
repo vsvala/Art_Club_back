@@ -38,6 +38,41 @@ jobs:
 
       - name: Security audit
         run: npm audit --audit-level=high
+
+  docker-publish:
+    needs: [ci-build-and-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Hae frontin tuore build-artifact frontend-reposta
+      - name: Download frontend build
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{ secrets.BACKEND_REPO_TOKEN }}
+          repo: vsvala/Art_Club
+          workflow: ci.yml
+          name: frontend-build
+          path: build/
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/vsvala/artclub-backend:latest
+
   deploy:
     needs: [ci-build-and-test]
     runs-on: ubuntu-latest
