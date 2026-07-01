@@ -87,7 +87,7 @@ jobs:
           sleep 30
           curl --fail --retry 10 --retry-delay 15 --retry-connrefused \
             --max-time 10 --connect-timeout 5 \
-            ${{ secrets.RENDER_APP_URL }}/api/healt
+            ${{ secrets.RENDER_APP_URL }}/api/health
   # Rollback is done manually from render.com UI--> Rollback to this deploy
   # --- Vaihe : Tag release ---
   # Luo automaattisesti uuden patch-version tagin onnistuneen deployn jälkeen

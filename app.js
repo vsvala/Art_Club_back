@@ -106,12 +106,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.use(middleware.unknownEndpoint);
+
 // Serve React app for all non-API routes so browser refresh works on any path
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 
 module.exports = app;
