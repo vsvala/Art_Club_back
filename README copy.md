@@ -139,12 +139,3 @@ See [SECURITY.md](.github/SECURITY.md) for the reporting policy.
 Maintenance notes, audit commands, and dependency caveats live in [docs/security-notes.md](docs/security-notes.md).
 
 Detailed architecture diagrams and flow notes are available in [docs/architecture.md](docs/architecture.md).
-
----
-
-## Future improvements
-
-- Add rate limiting to login and other sensitive endpoints.
-- Enforce ownership checks on user- and artwork-specific mutations.
-- Strengthen upload validation beyond MIME type checks.
-- Add audit logging for admin actions and security-relevant events.
