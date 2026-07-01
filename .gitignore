@@ -45,7 +45,13 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
+# security
 .env
+.env.*
+*.pem
+*.key
+secrets.*
+
 
 # Uploaded images — stored in Cloudinary, not in git
 uploads/
