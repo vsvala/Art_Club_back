@@ -46,6 +46,14 @@ jobs:
       - name: Trigger Render deploy
         run: curl --fail -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
+      - name: Health check
+        run: |
+          echo "Waiting for deployment to be ready..."
+          sleep 30
+          curl --fail --retry 10 --retry-delay 15 --retry-connrefused \
+            --max-time 10 --connect-timeout 5 \
+            ${{ secrets.RENDER_APP_URL }}/api/health
+
   # --- Vaihe : Tag release ---
   # Luo automaattisesti uuden patch-version tagin onnistuneen deployn jälkeen
   tag_release:

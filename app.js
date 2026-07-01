@@ -94,6 +94,10 @@ app.get("/api/weather", async (req, res) => {
   }
 });
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Serve React app for all non-API routes so browser refresh works on any path
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
