@@ -23,7 +23,8 @@
     "lint": "eslint .",
     "codecov": "node_modules/.bin/codecov",
     "deploy": "git push origin master",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "start:test": "cross-env NODE_ENV=test node --watch index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

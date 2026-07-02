@@ -87,10 +87,10 @@ artworksRouter.post(
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-      const imageUrl = await uploadToCloudinary(
-        req.file.buffer,
-        req.file.mimetype,
-      );
+      const imageUrl =
+        process.env.NODE_ENV === "test"
+          ? "https://placehold.co/100x100.png"
+          : await uploadToCloudinary(req.file.buffer, req.file.mimetype);
 
       const artwork = new Artwork({
         galleryImage: imageUrl,
@@ -128,7 +128,7 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
 
     await Artwork.findByIdAndDelete(req.params.id);
 
-    if (artwork.galleryImage) {
+    if (artwork.galleryImage && process.env.NODE_ENV !== "test") {
       try {
         const urlParts = artwork.galleryImage.split("/");
         const filenameWithExt = urlParts[urlParts.length - 1];

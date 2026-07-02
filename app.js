@@ -42,6 +42,11 @@ app.use(`${apiUrl}/events`, eventsRouter);
 app.use(`${apiUrl}/login`, loginLimiter, loginRouter);
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 
+if (process.env.NODE_ENV === 'test') {
+  const testingRouter = require('./controllers/testing')
+  app.use(`${apiUrl}/testing`, testingRouter)
+}
+
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Helsinki";
 
