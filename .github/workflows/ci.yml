@@ -51,7 +51,7 @@ jobs:
 
       # Hae frontin tuore build-artifact frontend-reposta
       - name: Download frontend build
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.BACKEND_REPO_TOKEN }}
           repo: vsvala/Art_Club
