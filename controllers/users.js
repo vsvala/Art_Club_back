@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const usersRouter = require("express").Router();
+const SALT_ROUNDS = 10;
 const User = require("../models/user");
 const logger = require("../utils/logger");
 const {
@@ -21,8 +22,7 @@ usersRouter.get("/", checkAdmin, async (req, res) => {
       medium: 1,
       galleryImage: 1,
     });
-    //res.json(users.map(u => u.toJSON()))
-    res.status(200).json(users);
+    res.status(200).json(users.map((u) => u.toJSON()));
   } catch (exception) {
     logger.error(exception.message);
     res.status(400).json({ error: "Could not get users from db" });
@@ -88,16 +88,14 @@ usersRouter.get("/artist/:id", async (req, res) => {
 usersRouter.get("/mypage", checkLogin, async (req, res, next) => {
   try {
     const token = authenticateToken(req);
-    const user = await User.findById(token.id)
-      // const user = await User.findById(req.params.id)
-      .populate("artworks");
+    const user = await User.findById(token.id).populate("artworks");
     if (user) {
       res.json(user.toJSON());
     } else {
       res.status(404).end();
     }
   } catch (error) {
-    next(error); //funktion next with parametr, moves error to errrorhandlingmiddleware
+    next(error);
   }
 });
 
@@ -115,8 +113,7 @@ usersRouter.post("/", registerLimiter, async (req, res) => {
         .status(400)
         .json({ error: "password must have at least 8 letters" });
     }
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(body.password, saltRounds);
+    const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
     const user = new User({
       name: body.name,
       email: body.email,
@@ -160,7 +157,7 @@ usersRouter.put("/admin", checkAdmin, async (req, res) => {
 usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
   try {
     const body = req.body;
-    if (body.newPassword.length < 8) {
+    if (!body.newPassword || body.newPassword.length < 8) {
       return res
         .status(400)
         .json({ error: "password must have at least 8 letters" });
@@ -168,8 +165,7 @@ usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
     const token = authenticateToken(req);
     const user = await User.findById(token.id);
     if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
-      const saltRounds = 10;
-      const newPasswordHash = await bcrypt.hash(body.newPassword, saltRounds);
+      const newPasswordHash = await bcrypt.hash(body.newPassword, SALT_ROUNDS);
       user.passwordHash = newPasswordHash;
       await user.save();
       res.status(200).end();

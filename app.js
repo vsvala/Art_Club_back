@@ -59,8 +59,7 @@ app.get("/api/weather", async (req, res) => {
 
   try {
     const geo = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`,
-      // `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=10&language=en&format=json`,
     );
     const geoData = await geo.json();
 
@@ -80,10 +79,7 @@ app.get("/api/weather", async (req, res) => {
       !weatherData.current ||
       weatherData.current.temperature_2m === undefined
     ) {
-      console.error(
-        "Weather data missing current field:",
-        JSON.stringify(weatherData),
-      );
+      logger.error("Weather data missing current field:", JSON.stringify(weatherData));
       return res.status(502).json({ error: "Weather data unavailable" });
     }
 
@@ -94,10 +90,8 @@ app.get("/api/weather", async (req, res) => {
       weather_code: weatherData.current.weather_code,
     });
   } catch (error) {
-    console.error("Weather error:", error);
-    res.status(500).json({
-      error: `Failed to fetch weather data: ${error.message}`,
-    });
+    logger.error("Weather error:", error.message);
+    res.status(500).json({ error: "Failed to fetch weather data" });
   }
 });
 
