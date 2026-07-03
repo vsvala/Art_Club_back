@@ -13,32 +13,31 @@ beforeEach(async () => {
   await Event.deleteMany({});
   await User.deleteMany({});
 
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+  const passwordHash = await bcrypt.hash("password123", 10);
   const user = await User.create({
-    name: "Taiteilija",
-    email: "taiteilija@example.com",
-    username: "taiteilija",
+    name: "Artist",
+    email: "artist@example.com",
+    username: "artist",
     passwordHash,
     role: "admin",
   });
 
   const loginRes = await api
     .post("/api/login")
-    .send({ username: "taiteilija", password: "salasana123" });
+    .send({ username: "artist", password: "password123" });
   token = loginRes.body.token;
 
-  // Luo testitapahtuma suoraan tietokantaan (ei kuvalatausta)
   await Event.create({
-    title: "Testitapahtuma",
-    place: "Testipaikka",
+    title: "Test Event",
+    place: "Test Place",
     start: new Date(),
     end: new Date(),
-    description: "Testikuvaus",
+    description: "Test description",
     user: user._id,
   });
 });
 
-test("tapahtumat palautetaan JSON-muodossa", async () => {
+test("events are returned as JSON", async () => {
   await api
     .get("/api/events")
     .set("Authorization", `Bearer ${token}`)
@@ -46,7 +45,7 @@ test("tapahtumat palautetaan JSON-muodossa", async () => {
     .expect("Content-Type", /application\/json/);
 });
 
-test("tapahtumia on oikea määrä", async () => {
+test("correct number of events is returned", async () => {
   const res = await api
     .get("/api/events")
     .set("Authorization", `Bearer ${token}`)
@@ -54,7 +53,7 @@ test("tapahtumia on oikea määrä", async () => {
   expect(res.body).toHaveLength(1);
 });
 
-test("tapahtuma poistetaan kirjautuneena käyttäjänä", async () => {
+test("event is deleted by logged-in admin", async () => {
   const events = await api
     .get("/api/events")
     .set("Authorization", `Bearer ${token}`);
@@ -71,35 +70,32 @@ test("tapahtuma poistetaan kirjautuneena käyttäjänä", async () => {
   expect(after.body).toHaveLength(0);
 });
 
-test("tapahtuman poisto epäonnistuu toisen käyttäjän tokenilla", async () => {
-  // Luo toinen käyttäjä ja kirjaudu sillä
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+test("event deletion fails with a non-admin token", async () => {
+  const passwordHash = await bcrypt.hash("password123", 10);
   await User.create({
-    name: "Toinen",
-    email: "toinen@example.com",
-    username: "toinenkayttaja",
+    name: "Member",
+    email: "member@example.com",
+    username: "member",
     passwordHash,
     role: "member",
   });
   const loginRes = await api
     .post("/api/login")
-    .send({ username: "toinenkayttaja", password: "salasana123" });
-  const otherToken = loginRes.body.token;
+    .send({ username: "member", password: "password123" });
+  const memberToken = loginRes.body.token;
 
-  // Yritä poistaa ensimmäisen käyttäjän tapahtuma
   const events = await api
     .get("/api/events")
-    .set("Authorization", `Bearer ${otherToken}`);
-
+    .set("Authorization", `Bearer ${token}`);
   const id = events.body[0].id;
 
   await api
     .delete(`/api/events/${id}`)
-    .set("Authorization", `Bearer ${otherToken}`)
+    .set("Authorization", `Bearer ${memberToken}`)
     .expect(403);
 });
 
-test("tapahtuman poisto epäonnistuu ilman tokenia", async () => {
+test("event deletion fails without a token", async () => {
   const events = await api
     .get("/api/events")
     .set("Authorization", `Bearer ${token}`);

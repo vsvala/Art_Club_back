@@ -1,10 +1,3 @@
-//- Käyttäjän luominen onnistuu
-// - Duplikaattikäyttäjänimi hylätään (400)
-// - Liian lyhyt salasana hylätään (400)
-// - Kirjautuminen onnistuu oikeilla tunnuksilla → token palautuu
-// - Kirjautuminen epäonnistuu väärällä salasanalla (401)
-// - Kirjautuminen ilman käyttäjänimeä (400)
-
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
@@ -15,24 +8,24 @@ const api = supertest(app);
 
 beforeEach(async () => {
   await User.deleteMany({});
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+  const passwordHash = await bcrypt.hash("password123", 10);
   await User.create({
-    name: "Testi Käyttäjä",
-    email: "testi@example.com",
-    username: "testikayttaja",
+    name: "Test User",
+    email: "test@example.com",
+    username: "testuser",
     passwordHash,
     role: "member",
   });
 });
 
-// --- Käyttäjän luominen ---
+// --- User creation ---
 
-test("uusi käyttäjä luodaan onnistuneesti", async () => {
+test("new user is created successfully", async () => {
   const newUser = {
-    name: "Uusi Käyttäjä",
-    email: "uusi@example.com",
-    username: "uusikayttaja",
-    password: "salasana123",
+    name: "New User",
+    email: "new@example.com",
+    username: "newuser",
+    password: "password123",
     role: "member",
   };
   const res = await api
@@ -41,81 +34,81 @@ test("uusi käyttäjä luodaan onnistuneesti", async () => {
     .expect(200)
     .expect("Content-Type", /application\/json/);
 
-  expect(res.body.username).toBe("uusikayttaja");
-  expect(res.body.passwordHash).toBeUndefined(); // salasana ei palaudu
+  expect(res.body.username).toBe("newuser");
+  expect(res.body.passwordHash).toBeUndefined();
 });
 
-test("käyttäjän luonti epäonnistuu jos käyttäjänimi on jo käytössä", async () => {
+test("user creation fails if username is already taken", async () => {
   const duplicate = {
-    name: "Toinen",
-    email: "toinen@example.com",
-    username: "testikayttaja", // sama kuin beforeEach:ssä
-    password: "salasana123",
+    name: "Another",
+    email: "another@example.com",
+    username: "testuser",
+    password: "password123",
   };
   const res = await api.post("/api/users").send(duplicate).expect(400);
 
   expect(res.body.error).toContain("unique");
 });
 
-test("käyttäjän luonti epäonnistuu liian lyhyellä salasanalla", async () => {
+test("user creation fails with a password shorter than 8 characters", async () => {
   const res = await api
     .post("/api/users")
     .send({
       name: "X",
       email: "x@x.com",
-      username: "xkayttaja",
-      password: "lyhyt",
+      username: "xuser",
+      password: "short",
     })
     .expect(400);
 
   expect(res.body.error).toContain("8");
 });
 
-// --- Kirjautuminen ---
+// --- Login ---
 
-test("kirjautuminen onnistuu oikeilla tunnuksilla", async () => {
+test("login succeeds with correct credentials", async () => {
   const res = await api
     .post("/api/login")
-    .send({ username: "testikayttaja", password: "salasana123" })
+    .send({ username: "testuser", password: "password123" })
     .expect(200);
 
   expect(res.body.token).toBeDefined();
-  expect(res.body.username).toBe("testikayttaja");
+  expect(res.body.username).toBe("testuser");
 });
 
-test("kirjautuminen epäonnistuu väärällä salasanalla", async () => {
+test("login fails with wrong password", async () => {
   const res = await api
     .post("/api/login")
-    .send({ username: "testikayttaja", password: "väärä" })
+    .send({ username: "testuser", password: "wrong" })
     .expect(401);
 
   expect(res.body.error).toContain("invalid");
 });
 
-test("kirjautuminen epäonnistuu ilman käyttäjänimeä", async () => {
-  await api.post("/api/login").send({ password: "salasana123" }).expect(400);
+test("login fails without username", async () => {
+  await api.post("/api/login").send({ password: "password123" }).expect(400);
 });
 
-// --- Salasanan vaihto ---
+// --- Password change ---
 
-test("salasanan vaihto epäonnistuu liian lyhyellä uudella salasanalla", async () => {
+test("password change fails if new password is shorter than 8 characters", async () => {
   const loginRes = await api
     .post("/api/login")
-    .send({ username: "testikayttaja", password: "salasana123" });
+    .send({ username: "testuser", password: "password123" });
   const userToken = loginRes.body.token;
 
   const res = await api
     .put("/api/users/password")
     .set("Authorization", `Bearer ${userToken}`)
-    .send({ oldPassword: "salasana123", newPassword: "lyhyt" })
+    .send({ oldPassword: "password123", newPassword: "short" })
     .expect(400);
 
   expect(res.body.error).toContain("8");
 });
 
-// --- Julkiset kentät ---
+// --- Public fields ---
 
-test("julkinen artistilista ei sisällä sähköpostia tai roolia", async () => {
+test("public artist list does not expose email or role", async () => {
   const res = await api.get("/api/users/artists").expect(200);
   res.body.forEach((user) => {
     expect(user.email).toBeUndefined();
@@ -123,7 +116,7 @@ test("julkinen artistilista ei sisällä sähköpostia tai roolia", async () => 
   });
 });
 
-test("julkinen yksittäinen artisti ei sisällä sähköpostia tai roolia", async () => {
+test("public single artist does not expose email or role", async () => {
   const artists = await api.get("/api/users/artists");
   const artistId = artists.body[0].id;
 

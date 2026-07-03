@@ -13,54 +13,53 @@ beforeEach(async () => {
   await Artwork.deleteMany({});
   await User.deleteMany({});
 
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+  const passwordHash = await bcrypt.hash("password123", 10);
   const user = await User.create({
-    name: "Taiteilija",
-    email: "taiteilija@example.com",
-    username: "taiteilija",
+    name: "Artist",
+    email: "artist@example.com",
+    username: "artist",
     passwordHash,
     role: "member",
   });
 
   const loginRes = await api
     .post("/api/login")
-    .send({ username: "taiteilija", password: "salasana123" });
+    .send({ username: "artist", password: "password123" });
   token = loginRes.body.token;
 
-  // Luo testiteos suoraan tietokantaan (ei kuvalatausta)
   await Artwork.create({
-    name: "Testiteos",
-    artist: "Taiteilija",
+    name: "Test Artwork",
+    artist: "Artist",
     year: 2024,
     size: "50x70 cm",
-    medium: "Öljy kankaalle",
+    medium: "Oil on canvas",
     likes: 0,
-    galleryImage: "https://example.com/kuva.jpg",
+    galleryImage: "https://example.com/image.jpg",
     user: user._id,
   });
 });
 
-test("taideteokset palautetaan JSON-muodossa", async () => {
+test("artworks are returned as JSON", async () => {
   await api
     .get("/api/artworks")
     .expect(200)
     .expect("Content-Type", /application\/json/);
 });
 
-test("taideteoksia on oikea määrä", async () => {
+test("correct number of artworks is returned", async () => {
   const res = await api.get("/api/artworks").expect(200);
   expect(res.body).toHaveLength(1);
 });
 
-test("yksittäinen taideteos löytyy id:llä", async () => {
+test("single artwork is found by id", async () => {
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;
 
   const res = await api.get(`/api/artworks/${id}`).expect(200);
-  expect(res.body.name).toBe("Testiteos");
+  expect(res.body.name).toBe("Test Artwork");
 });
 
-test("taideteoksen tykkäykset päivittyvät", async () => {
+test("artwork likes are updated", async () => {
   const artworks = await api.get("/api/artworks");
   const artwork = artworks.body[0];
 
@@ -70,7 +69,7 @@ test("taideteoksen tykkäykset päivittyvät", async () => {
     .expect(200);
 });
 
-test("taideteos poistetaan kirjautuneena käyttäjänä", async () => {
+test("artwork is deleted by its owner", async () => {
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;
 
@@ -83,22 +82,20 @@ test("taideteos poistetaan kirjautuneena käyttäjänä", async () => {
   expect(after.body).toHaveLength(0);
 });
 
-test("taideteoksen poisto epäonnistuu toisen käyttäjän tokenilla", async () => {
-  // Luo toinen käyttäjä ja kirjaudu sillä
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+test("artwork deletion fails with another user's token", async () => {
+  const passwordHash = await bcrypt.hash("password123", 10);
   await User.create({
-    name: "Toinen",
-    email: "toinen@example.com",
-    username: "toinenkayttaja",
+    name: "Other",
+    email: "other@example.com",
+    username: "otheruser",
     passwordHash,
     role: "member",
   });
   const loginRes = await api
     .post("/api/login")
-    .send({ username: "toinenkayttaja", password: "salasana123" });
+    .send({ username: "otheruser", password: "password123" });
   const otherToken = loginRes.body.token;
 
-  // Yritä poistaa ensimmäisen käyttäjän teos
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;
 
@@ -108,24 +105,24 @@ test("taideteoksen poisto epäonnistuu toisen käyttäjän tokenilla", async () 
     .expect(403);
 });
 
-test("taideteoksen poisto epäonnistuu ilman tokenia", async () => {
+test("artwork deletion fails without a token", async () => {
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;
 
   await api.delete(`/api/artworks/${id}`).expect(401);
 });
 
-test("taideteos luodaan aina tokenin käyttäjälle, ei clientin lähettämälle userId:lle", async () => {
-  const passwordHash = await bcrypt.hash("salasana123", 10);
+test("artwork is always created for the token user, not the client-supplied userId", async () => {
+  const passwordHash = await bcrypt.hash("password123", 10);
   const otherUser = await User.create({
-    name: "Toinen",
-    email: "toinen@example.com",
-    username: "toinenkayttaja",
+    name: "Other",
+    email: "other@example.com",
+    username: "otheruser",
     passwordHash,
     role: "member",
   });
 
-  // Minimaalinen validi PNG
+  // Minimal valid PNG
   const pngBuffer = Buffer.from(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
     "base64",
@@ -135,18 +132,18 @@ test("taideteos luodaan aina tokenin käyttäjälle, ei clientin lähettämälle
     .post("/api/artworks")
     .set("Authorization", `Bearer ${token}`)
     .field("userId", otherUser._id.toString())
-    .field("name", "Testiteos 2")
-    .field("artist", "Taiteilija")
+    .field("name", "Test Artwork 2")
+    .field("artist", "Artist")
     .field("year", "2024")
     .field("size", "50x70 cm")
-    .field("medium", "Öljy")
+    .field("medium", "Oil")
     .attach("galleryImage", pngBuffer, {
       filename: "test.png",
       contentType: "image/png",
     })
     .expect(200);
 
-  // Artwork kuuluu tokenin käyttäjälle, ei lähetetylle userId:lle
+  // IDOR: artwork belongs to the token user, not the client-supplied userId
   expect(res.body.user).not.toBe(otherUser._id.toString());
 });
 
