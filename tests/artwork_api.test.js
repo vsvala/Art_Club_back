@@ -115,6 +115,41 @@ test("taideteoksen poisto epäonnistuu ilman tokenia", async () => {
   await api.delete(`/api/artworks/${id}`).expect(401);
 });
 
+test("taideteos luodaan aina tokenin käyttäjälle, ei clientin lähettämälle userId:lle", async () => {
+  const passwordHash = await bcrypt.hash("salasana123", 10);
+  const otherUser = await User.create({
+    name: "Toinen",
+    email: "toinen@example.com",
+    username: "toinenkayttaja",
+    passwordHash,
+    role: "member",
+  });
+
+  // Minimaalinen validi PNG
+  const pngBuffer = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    "base64",
+  );
+
+  const res = await api
+    .post("/api/artworks")
+    .set("Authorization", `Bearer ${token}`)
+    .field("userId", otherUser._id.toString())
+    .field("name", "Testiteos 2")
+    .field("artist", "Taiteilija")
+    .field("year", "2024")
+    .field("size", "50x70 cm")
+    .field("medium", "Öljy")
+    .attach("galleryImage", pngBuffer, {
+      filename: "test.png",
+      contentType: "image/png",
+    })
+    .expect(200);
+
+  // Artwork kuuluu tokenin käyttäjälle, ei lähetetylle userId:lle
+  expect(res.body.user).not.toBe(otherUser._id.toString());
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });

@@ -96,6 +96,42 @@ test("kirjautuminen epäonnistuu ilman käyttäjänimeä", async () => {
   await api.post("/api/login").send({ password: "salasana123" }).expect(400);
 });
 
+// --- Salasanan vaihto ---
+
+test("salasanan vaihto epäonnistuu liian lyhyellä uudella salasanalla", async () => {
+  const loginRes = await api
+    .post("/api/login")
+    .send({ username: "testikayttaja", password: "salasana123" });
+  const userToken = loginRes.body.token;
+
+  const res = await api
+    .put("/api/users/password")
+    .set("Authorization", `Bearer ${userToken}`)
+    .send({ oldPassword: "salasana123", newPassword: "lyhyt" })
+    .expect(400);
+
+  expect(res.body.error).toContain("8");
+});
+
+// --- Julkiset kentät ---
+
+test("julkinen artistilista ei sisällä sähköpostia tai roolia", async () => {
+  const res = await api.get("/api/users/artists").expect(200);
+  res.body.forEach((user) => {
+    expect(user.email).toBeUndefined();
+    expect(user.role).toBeUndefined();
+  });
+});
+
+test("julkinen yksittäinen artisti ei sisällä sähköpostia tai roolia", async () => {
+  const artists = await api.get("/api/users/artists");
+  const artistId = artists.body[0].id;
+
+  const res = await api.get(`/api/users/artist/${artistId}`).expect(200);
+  expect(res.body.email).toBeUndefined();
+  expect(res.body.role).toBeUndefined();
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
