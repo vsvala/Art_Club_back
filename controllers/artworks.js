@@ -151,7 +151,7 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
 });
 
 //update likes
-artworksRouter.put("/:id", async (req, res) => {
+artworksRouter.put("/:id", checkLogin, async (req, res) => {
   try {
     const artwork = await Artwork.findById(req.body.id);
     await Artwork.findByIdAndUpdate(req.body.id, { likes: req.body.likes });

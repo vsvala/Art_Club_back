@@ -65,8 +65,19 @@ test("artwork likes are updated", async () => {
 
   await api
     .put(`/api/artworks/${artwork.id}`)
+    .set("Authorization", `Bearer ${token}`)
     .send({ id: artwork.id, likes: 5 })
     .expect(200);
+});
+
+test("artwork likes update fails without a token", async () => {
+  const artworks = await api.get("/api/artworks");
+  const artwork = artworks.body[0];
+
+  await api
+    .put(`/api/artworks/${artwork.id}`)
+    .send({ id: artwork.id, likes: 5 })
+    .expect(401);
 });
 
 test("artwork is deleted by its owner", async () => {
