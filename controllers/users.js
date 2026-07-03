@@ -32,14 +32,16 @@ usersRouter.get("/", checkAdmin, async (req, res) => {
 // get all users/artist
 usersRouter.get("/artists", async (req, res) => {
   try {
-    const users = await User.find({}).populate("artworks", {
-      artist: 1,
-      name: 1,
-      year: 1,
-      size: 1,
-      medium: 1,
-      galleryImage: 1,
-    });
+    const users = await User.find({})
+      .select("name intro artworks")
+      .populate("artworks", {
+        artist: 1,
+        name: 1,
+        year: 1,
+        size: 1,
+        medium: 1,
+        galleryImage: 1,
+      });
     res.json(users.map((u) => u.toJSON()));
   } catch (exception) {
     logger.error(exception.message);
@@ -67,7 +69,9 @@ usersRouter.get("/admin/:id", checkUser, async (req, res) => {
 //gets single user with specific id for everybody
 usersRouter.get("/artist/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate("artworks");
+    const user = await User.findById(req.params.id)
+      .select("name intro artworks")
+      .populate("artworks");
     if (user) {
       res.json(user.toJSON());
     } else {
