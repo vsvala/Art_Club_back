@@ -3,9 +3,8 @@ const multer = require("multer");
 const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const { cloud_name, api_key, api_secret } = require("../utils/config");
 const cloudinary = require("cloudinary").v2;
-const { checkLogin, checkAdmin } = require("../utils/checkRoute");
+const { checkLogin, checkAdmin, authenticateToken } = require("../utils/checkRoute");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -67,7 +66,9 @@ eventsRouter.post(
   async (req, res) => {
     const body = req.body;
     try {
-      const user = await User.findById(body.userId);
+      const token = authenticateToken(req);
+      const user = await User.findById(token.id);
+      if (!user) return res.status(404).json({ error: "user not found" });
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }

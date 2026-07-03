@@ -84,10 +84,9 @@ artworksRouter.post(
     const body = req.body;
     try {
       const token = authenticateToken(req);
-      if (body.userId !== token.id.toString()) {
-        return res.status(403).json({ error: "forbidden" });
-      }
-      const user = await User.findById(body.userId);
+      const user = await User.findById(token.id);
+      if (!user) return res.status(404).json({ error: "user not found" });
+
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
@@ -104,7 +103,7 @@ artworksRouter.post(
         size: req.body.size,
         medium: req.body.medium,
         likes: req.body.likes === "" ? false : req.body.likes === 0,
-        user: req.body.userId,
+        user: token.id,
       });
       const savedArtwork = await artwork.save();
       user.artworks = await user.artworks.concat(savedArtwork.id);

@@ -233,3 +233,9 @@ Detailed architecture diagrams and flow notes are available in [docs/architectur
 
 - Add audit logging for admin actions and security-relevant events.
 - Add Sentry error tracking for production error visibility
+
+### JWT storage
+
+JWT tokens are currently stored in `localStorage`, which is accessible to JavaScript and therefore vulnerable to XSS attacks. A more secure alternative is to use `httpOnly` cookies, which cannot be read by JavaScript at all.
+
+Migrating to cookie-based auth requires changes on both sides: the backend would set and read the token via a cookie instead of the `Authorization` header, and the frontend would stop managing the token manually. This is a larger refactor and has been left as a future improvement.
