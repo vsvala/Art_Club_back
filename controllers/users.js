@@ -40,8 +40,7 @@ usersRouter.get("/artists", async (req, res) => {
       medium: 1,
       galleryImage: 1,
     });
-    //res.json(users.map(u => u.toJSON()))
-    res.status(200).json(users);
+    res.json(users.map((u) => u.toJSON()));
   } catch (exception) {
     logger.error(exception.message);
     res.status(400).json({ error: "Could not get artists from db" });

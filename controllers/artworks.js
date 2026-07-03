@@ -83,6 +83,10 @@ artworksRouter.post(
   async (req, res) => {
     const body = req.body;
     try {
+      const token = authenticateToken(req);
+      if (body.userId !== token.id.toString()) {
+        return res.status(403).json({ error: "forbidden" });
+      }
       const user = await User.findById(body.userId);
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
