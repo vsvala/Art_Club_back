@@ -87,20 +87,19 @@ Authorization: Bearer <token>
 | GET    | `/api/artworks`     | All artworks        | —      |
 | GET    | `/api/artworks/:id` | Single artwork      | —      |
 | POST   | `/api/artworks`     | Add artwork + image | member |
-| PUT    | `/api/artworks/:id` | Update likes        | —      |
+| PUT    | `/api/artworks/:id` | Update likes        | member |
 | DELETE | `/api/artworks/:id` | Delete artwork      | member |
 
 **Adding an image (POST /api/artworks)** — `multipart/form-data`:
 
-| Field          | Type   | Description                   |
-| -------------- | ------ | ----------------------------- |
-| `galleryImage` | file   | Image (jpg/png/gif, max 5 MB) |
-| `artist`       | text   | Artist name                   |
-| `name`         | text   | Artwork title                 |
-| `year`         | number | Year                          |
-| `size`         | text   | Size e.g. "50x70 cm"          |
-| `medium`       | text   | Medium e.g. "Oil on canvas"   |
-| `userId`       | text   | User id                       |
+| Field          | Type   | Description                          |
+| -------------- | ------ | ------------------------------------ |
+| `galleryImage` | file   | Image (jpg/png/gif/webp, max 5 MB)   |
+| `artist`       | text   | Artist name                          |
+| `name`         | text   | Artwork title                        |
+| `year`         | number | Year                                 |
+| `size`         | text   | Size e.g. "50x70 cm"                 |
+| `medium`       | text   | Medium e.g. "Oil on canvas"          |
 
 The image is automatically uploaded to Cloudinary under the folder `artclub`.
 
