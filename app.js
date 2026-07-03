@@ -15,7 +15,7 @@ const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
 
-logger.info("connecting to", config.MONGODB_URI);
+logger.info("connecting to MongoDB...");
 mongoose
   .connect(config.MONGODB_URI)
   .then(() => {

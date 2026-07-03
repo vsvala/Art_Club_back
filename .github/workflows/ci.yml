@@ -85,7 +85,7 @@ jobs:
         run: |
           echo "Waiting for deployment to be ready..."
           for i in $(seq 1 20); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --connect-timeout 5 ${{ secrets.RENDER_APP_URL }}/api/health)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --connect-timeout 5 ${{ secrets.RENDER_APP_URL }}/api/health || echo "000")
             echo "Attempt $i: HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
               echo "Health check passed!"
