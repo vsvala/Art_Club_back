@@ -4,6 +4,8 @@ const requestLogger = (request, response, next) => {
   const start = Date.now()
   const body = { ...request.body }
   if (body.password) body.password = '***'
+  if (body.oldPassword) body.oldPassword = '***'
+  if (body.newPassword) body.newPassword = '***'
 
   response.on('finish', () => {
     const duration = Date.now() - start
