@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const app = express();
 const cors = require("cors");
+const helmet = require("helmet");
 const mongoose = require("mongoose");
 const { loginLimiter } = require("./utils/limiters");
 
@@ -28,6 +29,7 @@ mongoose
   });
 
 // Middlewares
+app.use(helmet());
 app.use(
   cors({
     origin:

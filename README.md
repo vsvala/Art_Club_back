@@ -231,8 +231,23 @@ Detailed architecture diagrams and flow notes are available in [docs/architectur
 
 ## Future improvements
 
-- Add audit logging for admin actions and security-relevant events.
+### High priority
+
+- **Helmet.js** — add HTTP security headers (Content-Security-Policy, X-Frame-Options, etc.) with a single middleware call
+- **Input validation** — add `express-validator` or `joi` to validate field formats (email, max lengths, required fields) at the API boundary instead of relying on Mongoose errors
+- **Token refresh** — implement refresh token pattern so users stay logged in securely beyond the current 10 h JWT expiry
+
+### Architecture
+
+- **Service layer** — move business logic out of controllers into a dedicated service layer (`services/artworkService.js` etc.) for better testability and separation of concerns
+- **Consistent error handling** — unify inline error handling and `next(error)` patterns so all API error responses follow the same shape
+- **Pagination** — `GET /api/artworks` returns all records; add `?page` and `?limit` query params for scalability
+
+### Production readiness
+
 - Add Sentry error tracking for production error visibility
+- Add audit logging for admin actions and security-relevant events (role changes, user deletions)
+- Migrate JWT from `localStorage` to `httpOnly` cookies (see section below)
 
 ### JWT storage
 
