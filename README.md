@@ -55,6 +55,7 @@ MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub
 TEST_MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub_test
 PORT=3003
 SECRET=<jwt-secret-key>
+TEST_SECRET=<jwt-secret-for-tests>
 CLOUDINARY_CLOUD_NAME=<cloudinary-name>
 CLOUDINARY_API_KEY=<cloudinary-api-key>
 CLOUDINARY_API_SECRET=<cloudinary-api-secret>
@@ -230,6 +231,5 @@ Detailed architecture diagrams and flow notes are available in [docs/architectur
 
 ## Future improvements
 
-- Enforce ownership checks on user- and artwork-specific mutations.
 - Add audit logging for admin actions and security-relevant events.
 - Add Sentry error tracking for production error visibility
