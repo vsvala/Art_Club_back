@@ -21,11 +21,12 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/png" ||
-    file.mimetype === "application/pdf" ||
-    file.mimetype === "image/gif"
+    file.mimetype === "image/gif" ||
+    file.mimetype === "image/webp"
   ) {
     cb(null, true);
   } else {
+    logger.error(`Rejected file upload: unsupported mimetype ${file.mimetype}`);
     cb(null, false);
   }
 };
