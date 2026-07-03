@@ -20,6 +20,7 @@ jobs:
     env:
       TEST_MONGODB_URI: mongodb://localhost:27017/art_club_test
       SECRET: ${{ secrets.TEST_SECRET }}
+      TEST_SECRET: ${{ secrets.TEST_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
