@@ -255,7 +255,6 @@ To audit the production deployment use [securityheaders.com](https://securityhea
 
 ### High priority
 
-- **Helmet.js** — add HTTP security headers (Content-Security-Policy, X-Frame-Options, etc.) with a single middleware call
 - **Input validation** — add `express-validator` or `joi` to validate field formats (email, max lengths, required fields) at the API boundary instead of relying on Mongoose errors
 - **Token refresh** — implement refresh token pattern so users stay logged in securely beyond the current 10 h JWT expiry
 
