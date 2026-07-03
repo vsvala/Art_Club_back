@@ -1,49 +1,9 @@
 const eventsRouter = require("express").Router();
-const multer = require("multer");
 const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const cloudinary = require("cloudinary").v2;
+const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/upload");
 const { checkLogin, checkAdmin, authenticateToken } = require("../utils/checkRoute");
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-//rejects storing a file if not image
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/gif" ||
-    file.mimetype === "image/webp"
-  ) {
-    cb(null, true);
-  } else {
-    logger.error(`Rejected file upload: unsupported mimetype ${file.mimetype}`);
-    cb(null, false);
-  }
-};
-//filesize limitations
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 1024 * 1024 * 5 },
-  fileFilter: fileFilter,
-});
-
-const uploadToCloudinary = (buffer, mimetype) =>
-  new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "artclub" },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      },
-    );
-    stream.end(buffer);
-  });
 
 //gets all events
 eventsRouter.get("/", checkLogin, async (req, res) => {
@@ -64,7 +24,6 @@ eventsRouter.post(
   checkAdmin,
   upload.single("eventImage"),
   async (req, res) => {
-    const body = req.body;
     try {
       const token = authenticateToken(req);
       const user = await User.findById(token.id);
@@ -86,7 +45,7 @@ eventsRouter.post(
         user: user,
       });
       const savedEvent = await event.save();
-      res.status(200).json(savedEvent);
+      res.status(200).json(savedEvent.toJSON());
     } catch (error) {
       logger.error(error.message);
       res.status(400).json({ error: "bad req" });
@@ -103,8 +62,7 @@ eventsRouter.delete("/:id", checkAdmin, async (req, res, next) => {
     }
     if (event.eventImage) {
       try {
-        const publicId = event.eventImage.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`artclub/${publicId}`);
+        await deleteFromCloudinary(event.eventImage);
       } catch (cloudinaryError) {
         logger.error(`Cloudinary delete failed: ${cloudinaryError.message}`);
       }
