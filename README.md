@@ -227,6 +227,28 @@ Maintenance notes, audit commands, and dependency caveats live in [docs/security
 
 Detailed architecture diagrams and flow notes are available in [docs/architecture.md](docs/architecture.md).
 
+### HTTP security headers (Helmet)
+
+The API uses [Helmet](https://helmetjs.github.io/) to set HTTP security headers on every response. Helmet is applied as the first middleware so headers are present on all routes including errors.
+
+Key headers set by Helmet:
+
+| Header | Protection |
+|---|---|
+| `Content-Security-Policy` | Restricts which scripts, styles, and resources the browser may load — mitigates XSS |
+| `X-Frame-Options` | Prevents the page from being embedded in an iframe — mitigates clickjacking |
+| `Strict-Transport-Security` | Instructs the browser to use HTTPS only |
+| `X-Content-Type-Options` | Prevents the browser from guessing the content type |
+| `Referrer-Policy` | Controls how much referrer information is sent to other sites |
+
+To verify the headers locally:
+
+```bash
+curl -I http://localhost:3003/api/health
+```
+
+To audit the production deployment use [securityheaders.com](https://securityheaders.com).
+
 ---
 
 ## Future improvements
