@@ -160,14 +160,14 @@ usersRouter.put("/admin", checkAdmin, async (req, res) => {
 usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
   try {
     const body = req.body;
+    if (body.newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "password must have at least 8 letters" });
+    }
     const token = authenticateToken(req);
     const user = await User.findById(token.id);
     if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
-      if (body.newPassword.length < 8) {
-        return res
-          .status(400)
-          .json({ error: "password must have at least 8 letters" });
-      }
       const saltRounds = 10;
       const newPasswordHash = await bcrypt.hash(body.newPassword, saltRounds);
       user.passwordHash = newPasswordHash;

@@ -125,7 +125,7 @@ If MongoDB is not connected, returns HTTP 503:
 Quick test in terminal:
 
 ```bash
-curl http://localhost:3001/api/health
+curl http://localhost:3003/api/health
 ```
 
 ### Logging
@@ -138,7 +138,7 @@ Every HTTP request is logged by `requestLogger` middleware with method, path, st
 GET /api/artworks 200 43ms
 ```
 
-Passwords are masked in logs (`***`) so credentials never appear in plaintext. Errors in route handlers use `logger.error`. Unsupported file upload types are logged as errors.
+Password fields (`password`, `oldPassword`, `newPassword`) are masked in logs (`***`) so credentials never appear in plaintext. Errors in route handlers use `logger.error`. Unsupported file upload types are logged as errors.
 
 ### Pipeline flow
 
@@ -156,7 +156,7 @@ ci-build-and-test  ────────────────────�
            tag_release  →  auto-bump patch version tag
 ```
 
-`docker-publish` and `deploy` run in parallel once `ci-build-and-test` passes.
+`docker-publish` runs once `ci-build-and-test` passes. `deploy` waits for both `ci-build-and-test` **and** `docker-publish` to succeed.
 `tag_release` waits for both `ci-build-and-test` **and** `deploy` to succeed.
 
 ### Rollback
