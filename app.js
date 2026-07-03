@@ -28,7 +28,14 @@ mongoose
   });
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? false // same origin, no CORS needed
+        : "http://localhost:3000", // dev
+  }),
+);
 app.use(express.json());
 app.use(middleware.requestLogger);
 app.use(express.static("build"));
@@ -42,9 +49,9 @@ app.use(`${apiUrl}/events`, eventsRouter);
 app.use(`${apiUrl}/login`, loginLimiter, loginRouter);
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 
-if (process.env.NODE_ENV === 'test') {
-  const testingRouter = require('./controllers/testing')
-  app.use(`${apiUrl}/testing`, testingRouter)
+if (process.env.NODE_ENV === "test") {
+  const testingRouter = require("./controllers/testing");
+  app.use(`${apiUrl}/testing`, testingRouter);
 }
 
 app.get("/api/weather", async (req, res) => {

@@ -142,7 +142,7 @@ usersRouter.put("/admin", checkAdmin, async (req, res) => {
     return res.status(400).json({ error: "invalid role" });
   }
   try {
-    const updatedUser = await User.findByIdAndUpdate(body._id, {
+    const updatedUser = await User.findByIdAndUpdate(body.id, {
       role: body.role,
     });
     if (!updatedUser) {
@@ -163,6 +163,11 @@ usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
     const token = authenticateToken(req);
     const user = await User.findById(token.id);
     if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
+      if (body.newPassword.length < 8) {
+        return res
+          .status(400)
+          .json({ error: "password must have at least 8 letters" });
+      }
       const saltRounds = 10;
       const newPasswordHash = await bcrypt.hash(body.newPassword, saltRounds);
       user.passwordHash = newPasswordHash;
