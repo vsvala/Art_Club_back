@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const config = require("./config");
 
 //Gets the encoded token of the logged user
 const getTokenFrom = (request) => {
@@ -15,7 +16,7 @@ const authenticateToken = (req) => {
   if (!token) {
     throw new Error("token missing");
   }
-  const decodedToken = jwt.verify(token, process.env.SECRET);
+  const decodedToken = jwt.verify(token, config.SECRET);
 
   return decodedToken;
 };
