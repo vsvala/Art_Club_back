@@ -233,13 +233,13 @@ The API uses [Helmet](https://helmetjs.github.io/) to set HTTP security headers 
 
 Key headers set by Helmet:
 
-| Header | Protection |
-|---|---|
-| `Content-Security-Policy` | Restricts which scripts, styles, and resources the browser may load — mitigates XSS |
-| `X-Frame-Options` | Prevents the page from being embedded in an iframe — mitigates clickjacking |
-| `Strict-Transport-Security` | Instructs the browser to use HTTPS only |
-| `X-Content-Type-Options` | Prevents the browser from guessing the content type |
-| `Referrer-Policy` | Controls how much referrer information is sent to other sites |
+| Header                      | Protection                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `Content-Security-Policy`   | Restricts which scripts, styles, and resources the browser may load — mitigates XSS |
+| `X-Frame-Options`           | Prevents the page from being embedded in an iframe — mitigates clickjacking         |
+| `Strict-Transport-Security` | Instructs the browser to use HTTPS only                                             |
+| `X-Content-Type-Options`    | Prevents the browser from guessing the content type                                 |
+| `Referrer-Policy`           | Controls how much referrer information is sent to other sites                       |
 
 To verify the headers locally:
 
@@ -248,6 +248,48 @@ curl -I http://localhost:3003/api/health
 ```
 
 To audit the production deployment use [securityheaders.com](https://securityheaders.com).
+
+---
+
+## Sentry error tracking
+
+This backend uses [Sentry](https://sentry.io) for production error visibility.
+
+### Setup
+
+1. Create a Node.js project in Sentry and copy the DSN.
+2. Add the DSN to your environment variables:
+
+```env
+SENTRY_DSN=https://<key>@<org>.ingest.de.sentry.io/<project-id>
+```
+
+3. Install the SDK:
+
+```bash
+npm install @sentry/node --save
+```
+
+4. Initialize Sentry early in the app startup flow via [instrument.js](instrument.js) and import it first in [index.js](index.js).
+5. Register the Express error handler in [app.js](app.js) after all routes and before the custom error middleware.
+
+### Verify
+
+For a temporary test, add a route like this in [app.js](app.js):
+
+```js
+app.get("/debug-sentry", (req, res) => {
+  throw new Error("My first Sentry error!");
+});
+```
+
+Then open `http://localhost:3003/debug-sentry` and confirm the event appears in the Sentry dashboard.
+
+### Notes
+
+- Keep the test route only while verifying the integration.
+- `NODE_ENV=production` is recommended for deployed environments.
+- The backend does not need frontend source maps; those are only relevant for browser bundles.
 
 ---
 
@@ -266,7 +308,7 @@ To audit the production deployment use [securityheaders.com](https://securityhea
 
 ### Production readiness
 
-- Add Sentry error tracking for production error visibility
+- See the Sentry error tracking section above for production error visibility
 - Add audit logging for admin actions and security-relevant events (role changes, user deletions)
 - Migrate JWT from `localStorage` to `httpOnly` cookies (see section below)
 
