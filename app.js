@@ -111,10 +111,6 @@ if (process.env.NODE_ENV === "test") {
   const testingRouter = require("./controllers/testing");
   app.use(`${apiUrl}/testing`, testingRouter);
 }
-// route to test Sentry error reporting
-// app.get("/debug-sentry", (req, res) => {
-//   throw new Error("My first Sentry error!");
-// });
 
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Helsinki";
