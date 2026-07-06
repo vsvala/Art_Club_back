@@ -1,4 +1,5 @@
 const config = require("./utils/config");
+const Sentry = require("@sentry/node");
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -64,6 +65,10 @@ if (process.env.NODE_ENV === "test") {
   const testingRouter = require("./controllers/testing");
   app.use(`${apiUrl}/testing`, testingRouter);
 }
+// route to test Sentry error reporting
+// app.get("/debug-sentry", (req, res) => {
+//   throw new Error("My first Sentry error!");
+// });
 
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Helsinki";
@@ -90,7 +95,10 @@ app.get("/api/weather", async (req, res) => {
       !weatherData.current ||
       weatherData.current.temperature_2m === undefined
     ) {
-      logger.error("Weather data missing current field:", JSON.stringify(weatherData));
+      logger.error(
+        "Weather data missing current field:",
+        JSON.stringify(weatherData),
+      );
       return res.status(502).json({ error: "Weather data unavailable" });
     }
 
@@ -126,6 +134,7 @@ app.get("*", (req, res) => {
 
 app.use(middleware.unknownEndpoint);
 
+Sentry.setupExpressErrorHandler(app);
 app.use(middleware.errorHandler);
 
 module.exports = app;

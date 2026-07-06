@@ -28,6 +28,7 @@
     "start:test": "cross-env NODE_ENV=test node --watch index.js"
   },
   "dependencies": {
+    "@sentry/node": "^10.63.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
