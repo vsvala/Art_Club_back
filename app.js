@@ -17,6 +17,25 @@ const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
 
+const defaultCspDirectives =
+  helmet.contentSecurityPolicy.getDefaultDirectives();
+const sentryIngestOrigin = (() => {
+  try {
+    if (!process.env.SENTRY_DSN) return null;
+    return new URL(process.env.SENTRY_DSN).origin;
+  } catch (error) {
+    logger.warn(
+      "Invalid SENTRY_DSN, skipping CSP connect-src Sentry origin",
+      error.message,
+    );
+    return null;
+  }
+})();
+const connectSrc = [...(defaultCspDirectives["connect-src"] || ["'self'"])];
+if (sentryIngestOrigin && !connectSrc.includes(sentryIngestOrigin)) {
+  connectSrc.push(sentryIngestOrigin);
+}
+
 logger.info("connecting to MongoDB...");
 mongoose
   .connect(config.MONGODB_URI)
@@ -34,7 +53,8 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        ...defaultCspDirectives,
+        "connect-src": connectSrc,
         "img-src": ["'self'", "data:", "res.cloudinary.com"],
       },
     },
