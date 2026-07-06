@@ -308,7 +308,6 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 
 ### Production readiness
 
-- See the Sentry error tracking section above for production error visibility
 - Add audit logging for admin actions and security-relevant events (role changes, user deletions)
 - Migrate JWT from `localStorage` to `httpOnly` cookies (see section below)
 
