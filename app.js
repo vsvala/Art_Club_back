@@ -19,21 +19,42 @@ const tokenCheckRouter = require("./controllers/tokenCheck");
 
 const defaultCspDirectives =
   helmet.contentSecurityPolicy.getDefaultDirectives();
-const sentryIngestOrigin = (() => {
+
+const sentryDsnCandidates = [
+  process.env.SENTRY_DSN,
+  process.env.SENTRY_BROWSER_DSN,
+  process.env.VITE_SENTRY_DSN,
+  process.env.REACT_APP_SENTRY_DSN,
+  process.env.NEXT_PUBLIC_SENTRY_DSN,
+].filter(Boolean);
+
+const sentryIngestOrigins = [];
+for (const dsn of sentryDsnCandidates) {
   try {
-    if (!process.env.SENTRY_DSN) return null;
-    return new URL(process.env.SENTRY_DSN).origin;
+    const origin = new URL(dsn).origin;
+    if (!sentryIngestOrigins.includes(origin)) {
+      sentryIngestOrigins.push(origin);
+    }
   } catch (error) {
     logger.warn(
-      "Invalid SENTRY_DSN, skipping CSP connect-src Sentry origin",
+      "Invalid Sentry DSN in env, skipping CSP origin",
       error.message,
     );
-    return null;
   }
-})();
+}
+
 const connectSrc = [...(defaultCspDirectives["connect-src"] || ["'self'"])];
-if (sentryIngestOrigin && !connectSrc.includes(sentryIngestOrigin)) {
-  connectSrc.push(sentryIngestOrigin);
+for (const origin of sentryIngestOrigins) {
+  if (!connectSrc.includes(origin)) {
+    connectSrc.push(origin);
+  }
+}
+
+if (
+  sentryIngestOrigins.length === 0 &&
+  !connectSrc.includes("https://*.ingest.sentry.io")
+) {
+  connectSrc.push("https://*.ingest.sentry.io");
 }
 
 logger.info("connecting to MongoDB...");
