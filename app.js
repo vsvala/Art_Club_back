@@ -50,11 +50,16 @@ for (const origin of sentryIngestOrigins) {
   }
 }
 
-if (
-  sentryIngestOrigins.length === 0 &&
-  !connectSrc.includes("https://*.ingest.sentry.io")
-) {
-  connectSrc.push("https://*.ingest.sentry.io");
+if (sentryIngestOrigins.length === 0) {
+  const sentryFallbackOrigins = [
+    "https://*.ingest.sentry.io",
+    "https://*.ingest.de.sentry.io",
+  ];
+  for (const origin of sentryFallbackOrigins) {
+    if (!connectSrc.includes(origin)) {
+      connectSrc.push(origin);
+    }
+  }
 }
 
 logger.info("connecting to MongoDB...");
