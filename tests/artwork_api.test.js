@@ -116,6 +116,33 @@ test("artwork deletion fails with another user's token", async () => {
     .expect(403);
 });
 
+test("artwork is deleted by admin even when not owner", async () => {
+  const passwordHash = await bcrypt.hash("password123", 10);
+  await User.create({
+    name: "Admin",
+    email: "admin@example.com",
+    username: "adminuser",
+    passwordHash,
+    role: "admin",
+  });
+
+  const loginRes = await api
+    .post("/api/login")
+    .send({ username: "adminuser", password: "password123" });
+  const adminToken = loginRes.body.token;
+
+  const artworks = await api.get("/api/artworks");
+  const id = artworks.body[0].id;
+
+  await api
+    .delete(`/api/artworks/${id}`)
+    .set("Authorization", `Bearer ${adminToken}`)
+    .expect(204);
+
+  const after = await api.get("/api/artworks");
+  expect(after.body).toHaveLength(0);
+});
+
 test("artwork deletion fails without a token", async () => {
   const artworks = await api.get("/api/artworks");
   const id = artworks.body[0].id;

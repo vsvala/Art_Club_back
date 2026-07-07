@@ -2,11 +2,12 @@ const artworksRouter = require("express").Router();
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/upload");
 const {
-  authenticateToken,
-  checkLogin,
-} = require("../utils/checkRoute");
+  upload,
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} = require("../utils/upload");
+const { authenticateToken, checkLogin } = require("../utils/checkRoute");
 
 // gets all artworks and populates user details
 artworksRouter.get("/", async (req, res, next) => {
@@ -85,7 +86,9 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
     }
 
     const token = authenticateToken(req);
-    if (artwork.user.toString() !== token.id.toString()) {
+    const isOwner = artwork.user.toString() === token.id.toString();
+    const isAdmin = token.role === "admin";
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: "forbidden" });
     }
 

@@ -104,7 +104,11 @@ const apiUrl = "/api";
 app.use(`${apiUrl}/users`, usersRouter);
 app.use(`${apiUrl}/artworks`, artworksRouter);
 app.use(`${apiUrl}/events`, eventsRouter);
-app.use(`${apiUrl}/login`, loginLimiter, loginRouter);
+if (process.env.NODE_ENV === "test") {
+  app.use(`${apiUrl}/login`, loginRouter);
+} else {
+  app.use(`${apiUrl}/login`, loginLimiter, loginRouter);
+}
 app.use(`${apiUrl}/tokenCheck`, tokenCheckRouter);
 
 if (process.env.NODE_ENV === "test") {
