@@ -22,6 +22,7 @@ REST API Node.js/Express application for the Art Club gallery service. Uses Mong
 - Health check endpoint with MongoDB connection monitoring
 - Third-party API integration: weather proxy via Open-Meteo (geocoding + forecast, no API key required)
 - Single Docker image serves both the API and the React frontend
+- Centralized error handling — all unexpected errors route through a single `errorHandler` middleware (CastError, ValidationError, TokenExpiredError, LIMIT_FILE_SIZE) with a consistent `{ error: "..." }` JSON fallback and Sentry integration
 - Test suite (Jest), linting (ESLint), and dependency audit on every push
 - API reference, architecture diagrams, and security policy in docs/
 
@@ -139,7 +140,7 @@ Every HTTP request is logged by `requestLogger` middleware with method, path, st
 GET /api/artworks 200 43ms
 ```
 
-Password fields (`password`, `oldPassword`, `newPassword`) are masked in logs (`***`) so credentials never appear in plaintext. Errors in route handlers use `logger.error`. Unsupported file upload types are logged as errors.
+Password fields (`password`, `oldPassword`, `newPassword`) are masked in logs (`***`) so credentials never appear in plaintext. Errors flow through a centralized `errorHandler` middleware, which logs with `logger.error` and returns a consistent `{ error: "..." }` JSON response. Route handlers call `next(error)` — they do not log or respond directly. Unsupported file upload types are logged as errors.
 
 ### Pipeline flow
 
@@ -304,7 +305,6 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 ### Architecture
 
 - **Service layer** — move business logic out of controllers into a dedicated service layer (`services/artworkService.js` etc.) for better testability and separation of concerns
-- **Consistent error handling** — unify inline error handling and `next(error)` patterns so all API error responses follow the same shape
 
 ### Production readiness
 
