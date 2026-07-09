@@ -12,11 +12,28 @@ const { authenticateToken, checkLogin } = require("../utils/checkRoute");
 // gets all artworks and populates user details
 artworksRouter.get("/", async (req, res, next) => {
   try {
-    const artworks = await Artwork.find({}).populate("user", {
-      username: 1,
-      name: 1,
+    // const artworks = await Artwork.find({}).populate("user", {
+    //   username: 1,
+    //   name: 1,
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+    const [artworks, total] = await Promise.all([
+      Artwork.find({})
+        .populate("user", { username: 1, name: 1 })
+        .sort({ _id: 1 })
+        .skip(skip)
+        .limit(limit),
+      Artwork.countDocuments({}),
+    ]);
+    res.status(200).json({
+      artworks: artworks.map((artwork) => artwork.toJSON()),
+      total,
+      page,
+      limit,
+      hasMore: skip + artworks.length < total,
     });
-    res.status(200).json(artworks.map((artwork) => artwork.toJSON()));
+    //res.status(200).json(artworks.map((artwork) => artwork.toJSON()));
   } catch (exception) {
     next(exception);
   }
