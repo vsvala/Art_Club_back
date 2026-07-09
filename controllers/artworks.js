@@ -8,6 +8,7 @@ const {
   deleteFromCloudinary,
 } = require("../utils/upload");
 const { authenticateToken, checkLogin } = require("../utils/checkRoute");
+const { validateArtwork } = require("../utils/validators");
 
 // gets all artworks and populates user details
 artworksRouter.get("/", async (req, res, next) => {
@@ -58,6 +59,7 @@ artworksRouter.post(
   "/",
   checkLogin,
   upload.single("galleryImage"),
+  validateArtwork,
   async (req, res, next) => {
     try {
       const token = authenticateToken(req);

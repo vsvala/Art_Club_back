@@ -23,6 +23,7 @@ REST API Node.js/Express application for the Art Club gallery service. Uses Mong
 - Third-party API integration: weather proxy via Open-Meteo (geocoding + forecast, no API key required)
 - Single Docker image serves both the API and the React frontend
 - Centralized error handling — all unexpected errors route through a single `errorHandler` middleware (CastError, ValidationError, TokenExpiredError, LIMIT_FILE_SIZE) with a consistent `{ error: "..." }` JSON fallback and Sentry integration
+- Input validation with `express-validator` on all write endpoints (register, password change, profile update, intro, artwork creation, event creation)
 - Test suite (Jest), linting (ESLint), and dependency audit on every push
 - API reference, architecture diagrams, and security policy in docs/
 
@@ -36,6 +37,7 @@ REST API Node.js/Express application for the Art Club gallery service. Uses Mong
 - **JWT** — user authentication
 - **bcrypt** — password hashing
 - **multer** — file uploads
+- **express-validator** — input validation
 - **Open-Meteo** — weather data (Geocoding + Forecast API, no API key required)
 
 ---
@@ -299,7 +301,6 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 
 ### High priority
 
-- **Input validation** — add `express-validator` or `joi` to validate field formats (email, max lengths, required fields) at the API boundary instead of relying on Mongoose errors
 - **Token refresh** — implement refresh token pattern so users stay logged in securely beyond the current 10 h JWT expiry
 
 ### Architecture

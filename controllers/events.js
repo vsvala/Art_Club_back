@@ -2,6 +2,7 @@ const eventsRouter = require("express").Router();
 const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
+const validateEvent = require("../utils/validators").validateEvent;
 const {
   upload,
   uploadToCloudinary,
@@ -30,6 +31,7 @@ eventsRouter.get("/", checkLogin, async (req, res, next) => {
 eventsRouter.post(
   "/",
   checkAdmin,
+  validateEvent,
   upload.single("eventImage"),
   async (req, res, next) => {
     try {
