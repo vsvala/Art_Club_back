@@ -2,19 +2,27 @@ const eventsRouter = require("express").Router();
 const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/upload");
-const { checkLogin, checkAdmin, authenticateToken } = require("../utils/checkRoute");
+const {
+  upload,
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} = require("../utils/upload");
+const {
+  checkLogin,
+  checkAdmin,
+  authenticateToken,
+} = require("../utils/checkRoute");
 
 //gets all events
-eventsRouter.get("/", checkLogin, async (req, res) => {
+eventsRouter.get("/", checkLogin, async (req, res, next) => {
   try {
     const events = await Event.find({}).populate("user", {
       username: 1,
       name: 1,
     });
     res.json(events.map((event) => event.toJSON()));
-  } catch (exception) {
-    res.status(400).json({ error: "Could not get eventList from db" });
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -23,7 +31,7 @@ eventsRouter.post(
   "/",
   checkAdmin,
   upload.single("eventImage"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const token = authenticateToken(req);
       const user = await User.findById(token.id);
@@ -47,8 +55,7 @@ eventsRouter.post(
       const savedEvent = await event.save();
       res.status(200).json(savedEvent.toJSON());
     } catch (error) {
-      logger.error(error.message);
-      res.status(400).json({ error: "bad req" });
+      next(error);
     }
   },
 );
@@ -68,8 +75,8 @@ eventsRouter.delete("/:id", checkAdmin, async (req, res, next) => {
       }
     }
     res.status(204).end();
-  } catch (exception) {
-    next(exception);
+  } catch (error) {
+    next(error);
   }
 });
 

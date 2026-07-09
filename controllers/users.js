@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const usersRouter = require("express").Router();
 const SALT_ROUNDS = 10;
 const User = require("../models/user");
-const logger = require("../utils/logger");
+
 const {
   checkAdmin,
   authenticateToken,
@@ -12,7 +12,7 @@ const {
 const { registerLimiter, passwordLimiter } = require("../utils/limiters");
 
 // get all users, only for admin
-usersRouter.get("/", checkAdmin, async (req, res) => {
+usersRouter.get("/", checkAdmin, async (req, res, next) => {
   try {
     const users = await User.find({}).populate("artworks", {
       artist: 1,
@@ -23,14 +23,13 @@ usersRouter.get("/", checkAdmin, async (req, res) => {
       galleryImage: 1,
     });
     res.status(200).json(users.map((u) => u.toJSON()));
-  } catch (exception) {
-    logger.error(exception.message);
-    res.status(400).json({ error: "Could not get users from db" });
+  } catch (error) {
+    next(error);
   }
 });
 
 // get all users/artist
-usersRouter.get("/artists", async (req, res) => {
+usersRouter.get("/artists", async (req, res, next) => {
   try {
     const users = await User.find({})
       .select("name intro artworks")
@@ -43,31 +42,29 @@ usersRouter.get("/artists", async (req, res) => {
         galleryImage: 1,
       });
     res.json(users.map((u) => u.toJSON()));
-  } catch (exception) {
-    logger.error(exception.message);
-    res.status(400).json({ error: "Could not get artists from db" });
+  } catch (error) {
+    next(error);
   }
 });
 
 //gets single  user with specific id for logged user
-usersRouter.get("/admin/:id", checkUser, async (req, res) => {
+usersRouter.get("/admin/:id", checkUser, async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).populate("artworks");
     if (user) {
       res.json(user.toJSON());
     } else {
-      res.status(404).end();
+      res.status(404).json({
+        error: "User not found",
+      });
     }
-  } catch (exception) {
-    logger.error(exception.message);
-    res
-      .status(400)
-      .json({ error: "malformatted id, Could not get singleUser from db" });
+  } catch (error) {
+    next(error);
   }
 });
 
 //gets single user with specific id for everybody
-usersRouter.get("/artist/:id", async (req, res) => {
+usersRouter.get("/artist/:id", async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
       .select("name intro artworks")
@@ -75,13 +72,12 @@ usersRouter.get("/artist/:id", async (req, res) => {
     if (user) {
       res.json(user.toJSON());
     } else {
-      res.status(404).end();
+      res.status(404).json({
+        error: "User not found",
+      });
     }
-  } catch (exception) {
-    logger.error(exception.message);
-    res
-      .status(400)
-      .json({ error: "malformatted id, Could not get singleUser from db" });
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -100,15 +96,15 @@ usersRouter.get("/mypage", checkLogin, async (req, res, next) => {
 });
 
 //Creates user when registering
-usersRouter.post("/", registerLimiter, async (req, res) => {
+usersRouter.post("/", registerLimiter, async (req, res, next) => {
   try {
     const body = req.body;
     // check that username does not exist and password length is<8
-    const existingUser = await User.find({ username: body.username });
-    if (existingUser.length > 0) {
+    const existingUser = await User.findOne({ username: body.username });
+    if (existingUser) {
       return res.status(400).json({ error: "username must be unique" });
     }
-    if (body.password.length < 8) {
+    if (!body.password || body.password.length < 8) {
       return res
         .status(400)
         .json({ error: "password must have at least 8 letters" });
@@ -119,85 +115,93 @@ usersRouter.post("/", registerLimiter, async (req, res) => {
       email: body.email,
       username: body.username,
       passwordHash,
-      role: "nonMember", // // ← important !!! backend asettaa aina itse, ei req.body.role ettei kukaan pääse hyökkäämään
+      role: "nonMember", // ← important !!! backend asettaa aina itse, ei req.body.role ettei kukaan pääse hyökkäämään
     });
     const savedUser = await user.save();
     res.json(savedUser.toJSON());
-  } catch (exception) {
-    logger.error(exception.message);
-    res
-      .status(500)
-      .json({ error: "did not save user, something went wrong..." });
+  } catch (error) {
+    next(error);
   }
 });
 
 //Updates user role, only for admin
-usersRouter.put("/admin", checkAdmin, async (req, res) => {
+usersRouter.put("/admin", checkAdmin, async (req, res, next) => {
   const body = req.body;
   const allowedRoles = ["member", "nonMember", "admin"];
   if (!allowedRoles.includes(body.role)) {
     return res.status(400).json({ error: "invalid role" });
   }
   try {
-    const updatedUser = await User.findByIdAndUpdate(body.id, {
-      role: body.role,
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      body.id,
+      {
+        role: body.role,
+      },
+      { new: true, runValidators: true },
+    );
     if (!updatedUser) {
       return res.status(404).json({ error: "user not found" });
     }
     res.json(updatedUser.toJSON());
-  } catch (exception) {
-    res
-      .status(500)
-      .json({ error: "did not update role, something went wrong..." });
+  } catch (error) {
+    next(error);
   }
 });
 
 //Update password, for logged users
-usersRouter.put("/password", passwordLimiter, checkLogin, async (req, res) => {
-  try {
-    const body = req.body;
-    if (!body.newPassword || body.newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({ error: "password must have at least 8 letters" });
+usersRouter.put(
+  "/password",
+  passwordLimiter,
+  checkLogin,
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      if (!body.newPassword || body.newPassword.length < 8) {
+        return res
+          .status(400)
+          .json({ error: "password must have at least 8 letters" });
+      }
+      const token = authenticateToken(req);
+      const user = await User.findById(token.id);
+      if (!user) {
+        return res.status(404).json({ error: "user not found" });
+      }
+      if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
+        const newPasswordHash = await bcrypt.hash(
+          body.newPassword,
+          SALT_ROUNDS,
+        );
+        user.passwordHash = newPasswordHash;
+        await user.save();
+        res.status(200).end();
+      } else {
+        res.status(400).json({ error: "old password does not match" });
+      }
+    } catch (error) {
+      next(error);
     }
-    const token = authenticateToken(req);
-    const user = await User.findById(token.id);
-    if (await bcrypt.compare(body.oldPassword, user.passwordHash)) {
-      const newPasswordHash = await bcrypt.hash(body.newPassword, SALT_ROUNDS);
-      user.passwordHash = newPasswordHash;
-      await user.save();
-      res.status(200).end();
-    } else {
-      res.status(400).json({ error: "old password does not match" });
-    }
-  } catch (error) {
-    logger.error(error.message);
-    res.status(400).json({ error: "bad req" });
-  }
-});
+  },
+);
 
 //Updates user's introduction text with spesific id
-usersRouter.put("/intro/:id", checkUser, async (req, res) => {
+usersRouter.put("/intro/:id", checkUser, async (req, res, next) => {
   try {
     let updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { intro: req.body.intro },
       { new: true },
     );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "user not found" });
+    }
     res.json(updatedUser.toJSON());
-  } catch (exception) {
-    logger.error(exception.message);
-    res.status(500).json({
-      error: "did not update introduction, something went wrong...",
-    });
+  } catch (error) {
+    next(error);
   }
 });
 
 //Updates user information
-usersRouter.put("/info/:id", checkUser, async (req, res) => {
-  const body = req.body;
+usersRouter.put("/info/:id", checkUser, async (req, res, next) => {
   try {
     let updatedUser = await User.findByIdAndUpdate(
       req.params.id,
@@ -208,23 +212,25 @@ usersRouter.put("/info/:id", checkUser, async (req, res) => {
       },
       { new: true },
     );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "user not found" });
+    }
     res.json(updatedUser.toJSON());
-  } catch (exception) {
-    logger.error(exception.message);
-    res
-      .status(500)
-      .json({ error: "did not update information, something went wrong..." });
+  } catch (error) {
+    next(error);
   }
 });
 
 // delete user, only for admin
-usersRouter.delete("/:id", checkAdmin, async (req, res) => {
+usersRouter.delete("/:id", checkAdmin, async (req, res, next) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "user not found" });
+    }
     res.status(204).end();
-  } catch (exception) {
-    logger.error(exception.message);
-    res.status(400).json({ error: "bad req" });
+  } catch (error) {
+    next(error);
   }
 });
 module.exports = usersRouter;

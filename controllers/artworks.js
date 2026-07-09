@@ -34,8 +34,8 @@ artworksRouter.get("/", async (req, res, next) => {
       hasMore: skip + artworks.length < total,
     });
     //res.status(200).json(artworks.map((artwork) => artwork.toJSON()));
-  } catch (exception) {
-    next(exception);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -48,8 +48,8 @@ artworksRouter.get("/:id", async (req, res, next) => {
     } else {
       res.status(404).end();
     }
-  } catch (exception) {
-    next(exception);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -58,8 +58,7 @@ artworksRouter.post(
   "/",
   checkLogin,
   upload.single("galleryImage"),
-  async (req, res) => {
-    const body = req.body;
+  async (req, res, next) => {
     try {
       const token = authenticateToken(req);
       const user = await User.findById(token.id);
@@ -88,8 +87,7 @@ artworksRouter.post(
       await user.save();
       res.status(200).json(savedArtwork.toJSON());
     } catch (error) {
-      logger.error(error.message);
-      res.status(400).json({ error: "bad req" });
+      next(error);
     }
   },
 );
@@ -119,22 +117,22 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
       }
     }
     res.status(204).end();
-  } catch (exception) {
-    next(exception);
+  } catch (error) {
+    next(error);
   }
 });
 
 //update likes
-artworksRouter.put("/:id", checkLogin, async (req, res) => {
+artworksRouter.put("/:id", checkLogin, async (req, res, next) => {
   try {
     const artwork = await Artwork.findById(req.params.id);
+    if (!artwork) {
+      return res.status(404).json({ error: "artwork not found" });
+    }
     await Artwork.findByIdAndUpdate(req.params.id, { likes: req.body.likes });
     res.json(artwork.toJSON());
-  } catch (exception) {
-    logger.error(exception.message);
-    res
-      .status(500)
-      .json({ error: "did not update likes, something went wrong..." });
+  } catch (error) {
+    next(error);
   }
 });
 

@@ -23,7 +23,9 @@ const authenticateToken = (req) => {
 
 //Checks that the logged in user is accessing methods meant for him/her with  request param id
 const isAuthError = (error) =>
-  error.name === "JsonWebTokenError" || error.message === "token missing";
+  error.name === "JsonWebTokenError" ||
+  error.message === "token missing" ||
+  error.name === "TokenExpiredError";
 
 const checkUser = (req, res, next) => {
   try {
