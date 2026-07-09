@@ -65,8 +65,9 @@ When `NODE_ENV=test`, the app mounts a helper router at `/api/testing`:
 | --- | --- |
 | `POST /api/testing/reset` | Deletes all artworks and users |
 | `POST /api/testing/users` | Creates a user (body: `name`, `email`, `username`, `password`, `role`) |
+| `POST /api/testing/artworks` | Creates an artwork directly (body: `galleryImage`, `artist`, `name`, `year`, `size`, `medium`, `likes`, `user`) |
 
-This router is **not used by the current Jest tests** (those manipulate the database directly via Mongoose). It is intended for future browser-level E2E tests (e.g. Playwright or Cypress) that need to set up and tear down state through the HTTP API without direct database access.
+`artwork_api.test.js` uses all three endpoints to set up and tear down test state through the HTTP API. The event and user test suites still manipulate the database directly via Mongoose models. The router is also suitable for future browser-level E2E tests (e.g. Playwright or Cypress).
 
 ## CI setup
 

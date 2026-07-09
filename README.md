@@ -18,6 +18,7 @@ REST API Node.js/Express application for the Art Club gallery service. Uses Mong
 - Full CI/CD pipeline: automated testing, Docker publish, Render deploy, and version tagging
 - JWT authentication with role-based access control (member / admin)
 - Cloudinary integration for image uploads
+- Paginated artwork listing (`GET /api/artworks?page=1&limit=20`) with `total`, `hasMore` metadata
 - Health check endpoint with MongoDB connection monitoring
 - Third-party API integration: weather proxy via Open-Meteo (geocoding + forecast, no API key required)
 - Single Docker image serves both the API and the React frontend
@@ -304,7 +305,6 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 
 - **Service layer** — move business logic out of controllers into a dedicated service layer (`services/artworkService.js` etc.) for better testability and separation of concerns
 - **Consistent error handling** — unify inline error handling and `next(error)` patterns so all API error responses follow the same shape
-- **Pagination** — `GET /api/artworks` returns all records; add `?page` and `?limit` query params for scalability
 
 ### Production readiness
 

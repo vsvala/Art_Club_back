@@ -90,6 +90,31 @@ Authorization: Bearer <token>
 | PUT    | `/api/artworks/:id` | Update likes        | member |
 | DELETE | `/api/artworks/:id` | Delete artwork      | member |
 
+**Query parameters (GET /api/artworks):**
+
+| Parameter | Required | Default | Max | Description           |
+| --------- | -------- | ------- | --- | --------------------- |
+| `page`    | No       | `1`     | —   | Page number           |
+| `limit`   | No       | `20`    | 100 | Results per page      |
+
+**Example request:**
+
+```text
+GET /api/artworks?page=2&limit=10
+```
+
+**Example response:**
+
+```json
+{
+  "artworks": [ /* array of artwork objects */ ],
+  "total": 42,
+  "page": 2,
+  "limit": 10,
+  "hasMore": true
+}
+```
+
 **Adding an image (POST /api/artworks)** — `multipart/form-data`:
 
 | Field          | Type   | Description                          |
