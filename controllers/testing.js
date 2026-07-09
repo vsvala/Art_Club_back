@@ -17,4 +17,21 @@ router.post("/users", async (req, res) => {
   res.status(201).json(savedUser.toJSON());
 });
 
+router.post("/artworks", async (req, res) => {
+  const { galleryImage, artist, name, year, size, medium, likes, user } =
+    req.body;
+  const artwork = new Artwork({
+    galleryImage,
+    artist,
+    name,
+    year,
+    size,
+    medium,
+    likes: likes ?? 0,
+    user,
+  });
+  const savedArtwork = await artwork.save();
+  res.status(201).json(savedArtwork.toJSON());
+});
+
 module.exports = router;

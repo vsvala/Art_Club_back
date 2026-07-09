@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
 const app = require("../app");
@@ -125,6 +124,4 @@ test("public single artist does not expose email or role", async () => {
   expect(res.body.role).toBeUndefined();
 });
 
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+
