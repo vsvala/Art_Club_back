@@ -20,6 +20,67 @@ graph TD
 
 The backend acts as the single application layer for the frontend. It verifies JWT tokens, applies role-based checks, persists structured data in MongoDB, streams artwork images to Cloudinary, and proxies weather requests so the frontend does not need to talk to multiple external services directly.
 
+## Layered Architecture
+
+The solution is a three-layer architecture where each layer has a single responsibility.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        HTTP Request                          │
+└─────────────────────────────┬────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────┐
+│                  CONTROLLER  (controllers/)                  │
+│                                                              │
+│   ✓ Parses req  (body, params, query, headers)              │
+│   ✓ Calls the service with the right arguments              │
+│   ✓ Sends res  (status + json)                              │
+│   ✓ Calls next(error) on throw                              │
+│                                                              │
+│   ✗ No business logic                                        │
+│   ✗ No bcrypt, JWT, or direct DB queries                    │
+└─────────────────────────────┬────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────┐
+│                   SERVICE  (services/)                       │
+│                                                              │
+│   ✓ All business logic                                       │
+│   ✓ Database queries  (Model.find, Model.save ...)          │
+│   ✓ Side-effects  (Cloudinary, email, SMS ...)              │
+│   ✓ Business rules  (unique username, password policy ...)  │
+│   ✓ Returns data OR throws an Error                         │
+│                                                              │
+│   ✗ Never receives req / res objects                        │
+│   ✗ Never sets HTTP status codes                            │
+└──────────────┬──────────────────────────┬────────────────────┘
+               ↓                          ↓
+┌──────────────────────┐    ┌─────────────────────────────────┐
+│   MODEL  (models/)   │    │   EXTERNAL SERVICES             │
+│                      │    │                                 │
+│  Mongoose schema     │    │  Cloudinary  (images)           │
+│  MongoDB queries     │    │  Open-Meteo  (weather)          │
+│  Validation rules    │    │  Third-party APIs               │
+└──────────────────────┘    └─────────────────────────────────┘
+```
+
+**Error flow:**
+
+```
+HTTP POST /api/users
+    ↓
+Controller — parses req.body, calls userService.registerUser(body)
+    ↓
+userService.registerUser() — findOne: username already exists
+    ↓  throws Error('username must be unique')  { status: 400 }
+Controller — catch (error) → next(error)
+    ↓
+errorHandler middleware
+    ↓
+res.status(400).json({ error: 'username must be unique' })
+```
+
+---
+
 ## Database Model
 
 ```mermaid

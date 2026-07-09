@@ -190,7 +190,7 @@ graph TD
     API --> Cloudinary["Cloudinary"]
 ```
 
-Requests flow from the frontend into the Express API, which handles authentication, authorization, and data shaping before writing to MongoDB or sending images to Cloudinary. Weather data is proxied through the same backend so the frontend talks to one consistent API surface.
+Requests flow from the frontend into the Express API. Controllers handle only HTTP concerns (parsing, response); business logic lives in a dedicated service layer (`services/`). Services coordinate database access and Cloudinary side-effects, and never receive `req`/`res` objects. Weather data is proxied through the same backend so the frontend talks to one consistent API surface.
 
 For the fuller set of flow diagrams and model notes, see [docs/architecture.md](docs/architecture.md).
 
@@ -302,10 +302,6 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 ### High priority
 
 - **Token refresh** — implement refresh token pattern so users stay logged in securely beyond the current 10 h JWT expiry
-
-### Architecture
-
-- **Service layer** — move business logic out of controllers into a dedicated service layer (`services/artworkService.js` etc.) for better testability and separation of concerns
 
 ### Production readiness
 
