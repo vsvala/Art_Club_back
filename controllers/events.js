@@ -3,16 +3,8 @@ const Event = require("../models/event");
 const User = require("../models/user");
 const logger = require("../utils/logger");
 const validateEvent = require("../utils/validators").validateEvent;
-const {
-  upload,
-  uploadToCloudinary,
-  deleteFromCloudinary,
-} = require("../utils/upload");
-const {
-  checkLogin,
-  checkAdmin,
-  authenticateToken,
-} = require("../utils/checkRoute");
+const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/upload");
+const { checkLogin, checkAdmin, authenticateToken } = require("../utils/checkRoute");
 
 //gets all events
 eventsRouter.get("/", checkLogin, async (req, res, next) => {

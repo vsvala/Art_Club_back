@@ -9,10 +9,7 @@ const requestLogger = (request, response, next) => {
 
   response.on("finish", () => {
     const duration = Date.now() - start;
-    logger.info(
-      `${request.method} ${request.path} ${response.statusCode} ${duration}ms`,
-      body,
-    );
+    logger.info(`${request.method} ${request.path} ${response.statusCode} ${duration}ms`, body);
   });
 
   next();
@@ -34,6 +31,8 @@ const errorHandler = (error, req, res, next) => {
     return res.status(401).json({ error: "token expired" });
   } else if (error.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({ error: "file too large" });
+  } else if (error.status) {
+    return res.status(error.status).json({ error: error.message });
   }
 
   res.status(500).json({ error: "internal server error" });

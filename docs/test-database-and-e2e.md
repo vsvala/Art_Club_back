@@ -50,6 +50,7 @@ Note: event tests require a user with `role: "admin"` since event endpoints are 
 When `NODE_ENV=test`, two additional behaviours apply:
 
 **Cloudinary bypass** — artwork upload and delete skip Cloudinary entirely:
+
 - `POST /api/artworks` uses a static placeholder image (`https://placehold.co/100x100.png`) instead of uploading
 - `DELETE /api/artworks/:id` skips the Cloudinary delete call
 
@@ -61,10 +62,10 @@ This means tests do not need Cloudinary credentials and run without network call
 
 When `NODE_ENV=test`, the app mounts a helper router at `/api/testing`:
 
-| Endpoint | Description |
-| --- | --- |
-| `POST /api/testing/reset` | Deletes all artworks and users |
-| `POST /api/testing/users` | Creates a user (body: `name`, `email`, `username`, `password`, `role`) |
+| Endpoint                     | Description                                                                                                     |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `POST /api/testing/reset`    | Deletes all artworks and users                                                                                  |
+| `POST /api/testing/users`    | Creates a user (body: `name`, `email`, `username`, `password`, `role`)                                          |
 | `POST /api/testing/artworks` | Creates an artwork directly (body: `galleryImage`, `artist`, `name`, `year`, `size`, `medium`, `likes`, `user`) |
 
 `artwork_api.test.js` uses all three endpoints to set up and tear down test state through the HTTP API. The event and user test suites still manipulate the database directly via Mongoose models. The router is also suitable for future browser-level E2E tests (e.g. Playwright or Cypress).

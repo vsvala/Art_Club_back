@@ -2,20 +2,13 @@ const artworksRouter = require("express").Router();
 const Artwork = require("../models/artwork");
 const User = require("../models/user");
 const logger = require("../utils/logger");
-const {
-  upload,
-  uploadToCloudinary,
-  deleteFromCloudinary,
-} = require("../utils/upload");
+const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/upload");
 const { authenticateToken, checkLogin } = require("../utils/checkRoute");
 const { validateArtwork } = require("../utils/validators");
 
 // gets all artworks and populates user details
 artworksRouter.get("/", async (req, res, next) => {
   try {
-    // const artworks = await Artwork.find({}).populate("user", {
-    //   username: 1,
-    //   name: 1,
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;

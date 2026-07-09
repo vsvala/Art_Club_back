@@ -92,10 +92,10 @@ Authorization: Bearer <token>
 
 **Query parameters (GET /api/artworks):**
 
-| Parameter | Required | Default | Max | Description           |
-| --------- | -------- | ------- | --- | --------------------- |
-| `page`    | No       | `1`     | —   | Page number           |
-| `limit`   | No       | `20`    | 100 | Results per page      |
+| Parameter | Required | Default | Max | Description      |
+| --------- | -------- | ------- | --- | ---------------- |
+| `page`    | No       | `1`     | —   | Page number      |
+| `limit`   | No       | `20`    | 100 | Results per page |
 
 **Example request:**
 
@@ -107,7 +107,7 @@ GET /api/artworks?page=2&limit=10
 
 ```json
 {
-  "artworks": [ /* array of artwork objects */ ],
+  "artworks": [/* array of artwork objects */],
   "total": 42,
   "page": 2,
   "limit": 10,
@@ -117,14 +117,14 @@ GET /api/artworks?page=2&limit=10
 
 **Adding an image (POST /api/artworks)** — `multipart/form-data`:
 
-| Field          | Type   | Description                          |
-| -------------- | ------ | ------------------------------------ |
-| `galleryImage` | file   | Image (jpg/png/gif/webp, max 5 MB)   |
-| `artist`       | text   | Artist name                          |
-| `name`         | text   | Artwork title                        |
-| `year`         | number | Year                                 |
-| `size`         | text   | Size e.g. "50x70 cm"                 |
-| `medium`       | text   | Medium e.g. "Oil on canvas"          |
+| Field          | Type   | Description                        |
+| -------------- | ------ | ---------------------------------- |
+| `galleryImage` | file   | Image (jpg/png/gif/webp, max 5 MB) |
+| `artist`       | text   | Artist name                        |
+| `name`         | text   | Artwork title                      |
+| `year`         | number | Year                               |
+| `size`         | text   | Size e.g. "50x70 cm"               |
+| `medium`       | text   | Medium e.g. "Oil on canvas"        |
 
 The image is automatically uploaded to Cloudinary under the folder `artclub`.
 

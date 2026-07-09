@@ -34,11 +34,11 @@ npm audit fix --force
 npm outdated
 ```
 
-| Column | Meaning |
-| --- | --- |
-| Current | Currently installed version |
-| Wanted | Maximum allowed version per package.json |
-| Latest | Latest available version on npm |
+| Column  | Meaning                                  |
+| ------- | ---------------------------------------- |
+| Current | Currently installed version              |
+| Wanted  | Maximum allowed version per package.json |
+| Latest  | Latest available version on npm          |
 
 ## Updating Packages
 
@@ -55,11 +55,11 @@ npm ls packagename
 
 ## Recommended Maintenance Routine
 
-| Interval | Action |
-| --- | --- |
-| Monthly | `npm audit --omit=dev` — check production vulnerabilities |
-| Quarterly | `npm outdated` — consider updates |
-| Major updates | Always do in a separate branch, test thoroughly |
+| Interval      | Action                                                    |
+| ------------- | --------------------------------------------------------- |
+| Monthly       | `npm audit --omit=dev` — check production vulnerabilities |
+| Quarterly     | `npm outdated` — consider updates                         |
+| Major updates | Always do in a separate branch, test thoroughly           |
 
 ## Project-Specific Notes
 

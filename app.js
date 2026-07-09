@@ -17,8 +17,7 @@ const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
 
-const defaultCspDirectives =
-  helmet.contentSecurityPolicy.getDefaultDirectives();
+const defaultCspDirectives = helmet.contentSecurityPolicy.getDefaultDirectives();
 
 const sentryDsnCandidates = [
   process.env.SENTRY_DSN,
@@ -36,10 +35,7 @@ for (const dsn of sentryDsnCandidates) {
       sentryIngestOrigins.push(origin);
     }
   } catch (error) {
-    logger.warn(
-      "Invalid Sentry DSN in env, skipping CSP origin",
-      error.message,
-    );
+    logger.warn("Invalid Sentry DSN in env, skipping CSP origin", error.message);
   }
 }
 
@@ -51,10 +47,7 @@ for (const origin of sentryIngestOrigins) {
 }
 
 if (sentryIngestOrigins.length === 0) {
-  const sentryFallbackOrigins = [
-    "https://*.ingest.sentry.io",
-    "https://*.ingest.de.sentry.io",
-  ];
+  const sentryFallbackOrigins = ["https://*.ingest.sentry.io", "https://*.ingest.de.sentry.io"];
   for (const origin of sentryFallbackOrigins) {
     if (!connectSrc.includes(origin)) {
       connectSrc.push(origin);
@@ -137,14 +130,8 @@ app.get("/api/weather", async (req, res) => {
     );
     const weatherData = await weather.json();
 
-    if (
-      !weatherData.current ||
-      weatherData.current.temperature_2m === undefined
-    ) {
-      logger.error(
-        "Weather data missing current field:",
-        JSON.stringify(weatherData),
-      );
+    if (!weatherData.current || weatherData.current.temperature_2m === undefined) {
+      logger.error("Weather data missing current field:", JSON.stringify(weatherData));
       return res.status(502).json({ error: "Weather data unavailable" });
     }
 

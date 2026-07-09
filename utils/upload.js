@@ -27,13 +27,10 @@ const upload = multer({
 
 const uploadToCloudinary = (buffer, mimetype) =>
   new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "artclub" },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      },
-    );
+    const stream = cloudinary.uploader.upload_stream({ folder: "artclub" }, (error, result) => {
+      if (error) reject(error);
+      else resolve(result.secure_url);
+    });
     stream.end(buffer);
   });
 

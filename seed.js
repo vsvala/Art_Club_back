@@ -16,8 +16,7 @@ if (!MONGODB_URI) {
 }
 
 const shouldUseCloudinary =
-  process.env.NODE_ENV === "production" ||
-  process.env.SEED_UPLOAD_TO_CLOUDINARY === "true";
+  process.env.NODE_ENV === "production" || process.env.SEED_UPLOAD_TO_CLOUDINARY === "true";
 const cloudinaryFolder = process.env.CLOUDINARY_SEED_FOLDER || "artclub";
 const MAX_ARTWORKS_PER_ARTIST = 10;
 
@@ -68,8 +67,7 @@ const createCloudinaryPublicId = (fileName) => {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-  const safeName =
-    slug || `image-${Buffer.from(fileName).toString("hex").slice(0, 12)}`;
+  const safeName = slug || `image-${Buffer.from(fileName).toString("hex").slice(0, 12)}`;
 
   return `${cloudinaryFolder}/${safeName}`;
 };
@@ -181,9 +179,7 @@ const seed = async () => {
     },
   ];
 
-  const requiredMemberCount = Math.ceil(
-    imageFiles.length / MAX_ARTWORKS_PER_ARTIST,
-  );
+  const requiredMemberCount = Math.ceil(imageFiles.length / MAX_ARTWORKS_PER_ARTIST);
 
   const memberSeedData = Array.from({ length: requiredMemberCount }, (_, i) => {
     if (i < baseMemberSeedData.length) {
@@ -270,17 +266,12 @@ const seed = async () => {
     place: "Studio Room 2, Helsinki",
     start: "2026-08-15",
     end: "2026-08-15",
-    description:
-      "A hands-on watercolor workshop for all skill levels. Materials provided.",
+    description: "A hands-on watercolor workshop for all skill levels. Materials provided.",
     user: admin._id,
   });
 
   console.log("Seed complete!");
-  console.log(
-    "  admin    /",
-    process.env.SEED_ADMIN_PASSWORD,
-    " (role: admin)",
-  );
+  console.log("  admin    /", process.env.SEED_ADMIN_PASSWORD, " (role: admin)");
   console.log(
     "  members  /",
     process.env.SEED_MEMBER_PASSWORD,

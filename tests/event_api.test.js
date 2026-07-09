@@ -45,27 +45,17 @@ test("events are returned as JSON", async () => {
 });
 
 test("correct number of events is returned", async () => {
-  const res = await api
-    .get("/api/events")
-    .set("Authorization", `Bearer ${token}`)
-    .expect(200);
+  const res = await api.get("/api/events").set("Authorization", `Bearer ${token}`).expect(200);
   expect(res.body).toHaveLength(1);
 });
 
 test("event is deleted by logged-in admin", async () => {
-  const events = await api
-    .get("/api/events")
-    .set("Authorization", `Bearer ${token}`);
+  const events = await api.get("/api/events").set("Authorization", `Bearer ${token}`);
   const id = events.body[0].id;
 
-  await api
-    .delete(`/api/events/${id}`)
-    .set("Authorization", `Bearer ${token}`)
-    .expect(204);
+  await api.delete(`/api/events/${id}`).set("Authorization", `Bearer ${token}`).expect(204);
 
-  const after = await api
-    .get("/api/events")
-    .set("Authorization", `Bearer ${token}`);
+  const after = await api.get("/api/events").set("Authorization", `Bearer ${token}`);
   expect(after.body).toHaveLength(0);
 });
 
@@ -83,21 +73,14 @@ test("event deletion fails with a non-admin token", async () => {
     .send({ username: "member", password: "password123" });
   const memberToken = loginRes.body.token;
 
-  const events = await api
-    .get("/api/events")
-    .set("Authorization", `Bearer ${token}`);
+  const events = await api.get("/api/events").set("Authorization", `Bearer ${token}`);
   const id = events.body[0].id;
 
-  await api
-    .delete(`/api/events/${id}`)
-    .set("Authorization", `Bearer ${memberToken}`)
-    .expect(403);
+  await api.delete(`/api/events/${id}`).set("Authorization", `Bearer ${memberToken}`).expect(403);
 });
 
 test("event deletion fails without a token", async () => {
-  const events = await api
-    .get("/api/events")
-    .set("Authorization", `Bearer ${token}`);
+  const events = await api.get("/api/events").set("Authorization", `Bearer ${token}`);
   const id = events.body[0].id;
 
   await api.delete(`/api/events/${id}`).expect(401);

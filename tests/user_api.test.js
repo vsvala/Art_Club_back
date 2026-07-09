@@ -123,5 +123,3 @@ test("public single artist does not expose email or role", async () => {
   expect(res.body.email).toBeUndefined();
   expect(res.body.role).toBeUndefined();
 });
-
-

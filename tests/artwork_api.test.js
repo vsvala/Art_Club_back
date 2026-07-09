@@ -7,10 +7,7 @@ let uniqueCounter = 0;
 
 const uniqueValue = (prefix) => `${prefix}_${Date.now()}_${uniqueCounter++}`;
 
-const createUserAndToken = async ({
-  role = "member",
-  name = "Artist",
-} = {}) => {
+const createUserAndToken = async ({ role = "member", name = "Artist" } = {}) => {
   const username = uniqueValue(role === "admin" ? "adminuser" : "artist");
   const createRes = await api.post("/api/testing/users").send({
     name,
@@ -20,9 +17,7 @@ const createUserAndToken = async ({
     role,
   });
 
-  const loginRes = await api
-    .post("/api/login")
-    .send({ username, password: "password123" });
+  const loginRes = await api.post("/api/login").send({ username, password: "password123" });
 
   return { user: createRes.body, token: loginRes.body.token };
 };
@@ -86,10 +81,7 @@ test("artwork likes are updated", async () => {
 test("artwork likes update fails without a token", async () => {
   const { artworkId } = await createBaseFixture();
 
-  await api
-    .put(`/api/artworks/${artworkId}`)
-    .send({ id: artworkId, likes: 5 })
-    .expect(401);
+  await api.put(`/api/artworks/${artworkId}`).send({ id: artworkId, likes: 5 }).expect(401);
 });
 
 test("artwork is deleted by its owner", async () => {
@@ -115,9 +107,7 @@ test("artwork deletion fails with another user's token", async () => {
     password: "password123",
     role: "member",
   });
-  const loginRes = await api
-    .post("/api/login")
-    .send({ username, password: "password123" });
+  const loginRes = await api.post("/api/login").send({ username, password: "password123" });
   const otherToken = loginRes.body.token;
 
   await api
@@ -217,9 +207,7 @@ describe("pagination", () => {
   });
 
   test("first page returns correct.artworks and hasMore=true", async () => {
-    const res = await api
-      .get(`/api/artworks?page=1&limit=${LIMIT}`)
-      .expect(200);
+    const res = await api.get(`/api/artworks?page=1&limit=${LIMIT}`).expect(200);
     expect(res.body.artworks).toHaveLength(LIMIT);
     expect(res.body.page).toBe(1);
     expect(res.body.limit).toBe(LIMIT);
@@ -227,18 +215,14 @@ describe("pagination", () => {
   });
 
   test("middle page returns correct.artworks and hasMore=true", async () => {
-    const res = await api
-      .get(`/api/artworks?page=2&limit=${LIMIT}`)
-      .expect(200);
+    const res = await api.get(`/api/artworks?page=2&limit=${LIMIT}`).expect(200);
     expect(res.body.artworks).toHaveLength(LIMIT);
     expect(res.body.page).toBe(2);
     expect(res.body.hasMore).toBe(true);
   });
 
   test("last page returns remaining.artworks and hasMore=false", async () => {
-    const res = await api
-      .get(`/api/artworks?page=3&limit=${LIMIT}`)
-      .expect(200);
+    const res = await api.get(`/api/artworks?page=3&limit=${LIMIT}`).expect(200);
     expect(res.body.artworks).toHaveLength(TOTAL - LIMIT * 2);
     expect(res.body.page).toBe(3);
     expect(res.body.hasMore).toBe(false);

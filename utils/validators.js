@@ -17,15 +17,11 @@ const validateRegister = [
     .trim()
     .isLength({ min: 3, max: 30 })
     .withMessage("username must be 3-30 characters"),
-  body("password")
-    .isLength({ min: 8 })
-    .withMessage("password must have at least 8 characters"),
+  body("password").isLength({ min: 8 }).withMessage("password must have at least 8 characters"),
   validate,
 ];
 const validatePassword = [
-  body("newPassword")
-    .isLength({ min: 8 })
-    .withMessage("password must have at least 8 characters"),
+  body("newPassword").isLength({ min: 8 }).withMessage("password must have at least 8 characters"),
   validate,
 ];
 const validateUserInfo = [
@@ -39,28 +35,20 @@ const validateUserInfo = [
 ];
 
 const validateIntro = [
-  body("intro")
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage("intro max 500 characters"),
+  body("intro").optional().isLength({ max: 500 }).withMessage("intro max 500 characters"),
   validate,
 ];
 
 const validateArtwork = [
   body("artist").trim().notEmpty().withMessage("artist is required"),
   body("name").trim().notEmpty().withMessage("name is required"),
-  body("year")
-    .isInt({ min: 1000, max: 2100 })
-    .withMessage("year must be a valid year"),
+  body("year").isInt({ min: 1000, max: 2100 }).withMessage("year must be a valid year"),
   body("size").trim().notEmpty().withMessage("size is required"),
   body("medium").trim().notEmpty().withMessage("medium is required"),
   validate,
 ];
 
-const validateEvent = [
-  body("title").trim().notEmpty().withMessage("title is required"),
-  validate,
-];
+const validateEvent = [body("title").trim().notEmpty().withMessage("title is required"), validate];
 
 module.exports = {
   validateRegister,

@@ -18,8 +18,7 @@ router.post("/users", async (req, res) => {
 });
 
 router.post("/artworks", async (req, res) => {
-  const { galleryImage, artist, name, year, size, medium, likes, user } =
-    req.body;
+  const { galleryImage, artist, name, year, size, medium, likes, user } = req.body;
   const artwork = new Artwork({
     galleryImage,
     artist,
