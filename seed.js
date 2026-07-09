@@ -74,6 +74,15 @@ const createCloudinaryPublicId = (fileName) => {
   return `${cloudinaryFolder}/${safeName}`;
 };
 
+const getCloudinaryHttpCode = (error) => {
+  if (!error) return undefined;
+  if (typeof error.http_code === "number") return error.http_code;
+  if (error.error && typeof error.error.http_code === "number") {
+    return error.error.http_code;
+  }
+  return undefined;
+};
+
 const ensureCloudinaryImage = async (fileName) => {
   const publicId = createCloudinaryPublicId(fileName);
 
@@ -83,7 +92,8 @@ const ensureCloudinaryImage = async (fileName) => {
     });
     return { secureUrl: existing.secure_url, uploaded: false };
   } catch (error) {
-    if (error.http_code !== 404) {
+    const httpCode = getCloudinaryHttpCode(error);
+    if (httpCode !== 404) {
       throw error;
     }
   }
