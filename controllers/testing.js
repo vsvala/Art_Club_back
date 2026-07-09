@@ -27,7 +27,7 @@ router.post("/artworks", async (req, res) => {
     year,
     size,
     medium,
-    likes: likes ?? 0,
+    likes: likes ? likes : 0,
     user,
   });
   const savedArtwork = await artwork.save();
