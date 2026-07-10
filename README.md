@@ -285,6 +285,27 @@ Maintenance notes, audit commands, and dependency caveats live in [docs/security
 
 Detailed architecture diagrams and flow notes are available in [docs/architecture.md](docs/architecture.md).
 
+### Rate limiting
+
+The API uses [express-rate-limit](https://github.com/express-rate-limit/express-rate-limit) to protect against abuse and unintended load spikes. Limits are enforced per IP address.
+
+| Limiter | Route | Limit |
+|---|---|---|
+| `apiLimiter` | All `GET /api/*` routes | 100 req / min |
+| `loginLimiter` | `POST /api/login` | 10 req / 15 min |
+| `registerLimiter` | `POST /api/users` | 10 req / 1 h |
+| `passwordLimiter` | `PUT /api/users/password` | 5 req / 15 min |
+
+When a limit is exceeded the API returns `429 Too Many Requests` with a JSON body:
+
+```json
+{ "error": "Too many requests, please try again later" }
+```
+
+Limiters are defined in `utils/limiters.js` and applied in `app.js`.
+
+---
+
 ### HTTP security headers (Helmet)
 
 The API uses [Helmet](https://helmetjs.github.io/) to set HTTP security headers on every response. Helmet is applied as the first middleware so headers are present on all routes including errors.

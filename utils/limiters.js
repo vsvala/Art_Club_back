@@ -24,4 +24,11 @@ const passwordLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { loginLimiter, registerLimiter, passwordLimiter };
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minuutti
+  max: 100, // max 100 pyyntöä per IP per minuutti
+  message: { error: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+module.exports = { loginLimiter, registerLimiter, passwordLimiter, apiLimiter };

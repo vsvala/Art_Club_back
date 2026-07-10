@@ -6,7 +6,7 @@ const app = express();
 const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
-const { loginLimiter } = require("./utils/limiters");
+const { loginLimiter, apiLimiter } = require("./utils/limiters");
 
 //Routrers
 const usersRouter = require("./controllers/users");
@@ -94,9 +94,9 @@ app.use("/uploads", express.static("uploads")); //create a static path reference
 app.use("/public/uploads", express.static("uploads"));
 
 const apiUrl = "/api";
-app.use(`${apiUrl}/users`, usersRouter);
-app.use(`${apiUrl}/artworks`, artworksRouter);
-app.use(`${apiUrl}/events`, eventsRouter);
+app.use(`${apiUrl}/users`, apiLimiter, usersRouter);
+app.use(`${apiUrl}/artworks`, apiLimiter, artworksRouter);
+app.use(`${apiUrl}/events`, apiLimiter, eventsRouter);
 if (process.env.NODE_ENV === "test") {
   app.use(`${apiUrl}/login`, loginRouter);
 } else {
