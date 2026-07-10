@@ -4,9 +4,9 @@ const mongoose = require("mongoose");
 const eventSchema = new mongoose.Schema({
   eventImage: String,
   title: { type: String, required: true },
-  place: String,
-  start: String,
-  end: String,
+  place: { type: String, required: true },
+  start: { type: String, required: true },
+  end: { type: String, required: true },
   description: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,

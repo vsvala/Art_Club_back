@@ -19,8 +19,8 @@ eventsRouter.get("/", checkLogin, async (req, res, next) => {
 eventsRouter.post(
   "/",
   checkAdmin,
-  validateEvent,
   upload.single("eventImage"),
+  validateEvent,
   async (req, res, next) => {
     try {
       const token = authenticateToken(req);

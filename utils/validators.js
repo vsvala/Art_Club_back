@@ -48,7 +48,13 @@ const validateArtwork = [
   validate,
 ];
 
-const validateEvent = [body("title").trim().notEmpty().withMessage("title is required"), validate];
+const validateEvent = [
+  body("title").trim().notEmpty().withMessage("title is required"),
+  body("place").trim().notEmpty().withMessage("place is required"),
+  body("start").trim().notEmpty().withMessage("start is required"),
+  body("end").trim().notEmpty().withMessage("end is required"),
+  validate,
+];
 
 module.exports = {
   validateRegister,

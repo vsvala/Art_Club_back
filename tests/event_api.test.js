@@ -87,6 +87,44 @@ test("event deletion fails without a token", async () => {
   await api.delete(`/api/events/${id}`).expect(401);
 });
 
+describe("event creation validation", () => {
+  const pngBuffer = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    "base64",
+  );
+
+  const validFields = {
+    title: "New Event",
+    place: "New Place",
+    start: new Date().toISOString(),
+    end: new Date().toISOString(),
+    description: "New description",
+  };
+
+  test.each(["place", "start", "end"])("event creation fails when %s is missing", async (field) => {
+    const fields = { ...validFields };
+    delete fields[field];
+
+    const req = api.post("/api/events").set("Authorization", `Bearer ${token}`);
+    Object.entries(fields).forEach(([key, value]) => req.field(key, value));
+    const res = await req
+      .attach("eventImage", pngBuffer, { filename: "test.png", contentType: "image/png" })
+      .expect(400);
+
+    expect(res.body.error).toBeDefined();
+  });
+
+  test("event is created when all required fields are present", async () => {
+    const req = api.post("/api/events").set("Authorization", `Bearer ${token}`);
+    Object.entries(validFields).forEach(([key, value]) => req.field(key, value));
+    const res = await req
+      .attach("eventImage", pngBuffer, { filename: "test.png", contentType: "image/png" })
+      .expect(200);
+
+    expect(res.body.title).toBe("New Event");
+  });
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
