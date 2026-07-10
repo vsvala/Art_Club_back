@@ -49,6 +49,9 @@ node_modules/
 # security
 .env
 .env.*
+# Allow example file
+!.env.example
+
 *.pem
 *.key
 secrets.*
