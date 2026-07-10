@@ -228,6 +228,28 @@ mongoose.connect(config.MONGODB_URI, {
 })
 ```
 
+### Database indexes
+
+Explicit indexes are defined on frequently queried fields so MongoDB can resolve queries with an index scan instead of a full collection scan as the dataset grows.
+
+| Collection | Field | Index type | Why |
+|---|---|---|---|
+| `artworks` | `user` | ascending | Filter artworks by owner (current and future queries) |
+| `artworks` | `artist` | ascending | Search/filter by artist name |
+| `users` | `role` | ascending | Role-based access filtering |
+| `users` | `username` | unique | Login lookup — created automatically by `unique: true` |
+
+`_id` is always indexed by MongoDB automatically.
+
+Indexes are defined in the Mongoose schemas (`index: true` / `unique: true`) in `models/artwork.js` and `models/user.js`. Mongoose applies them on startup. To verify in the MongoDB shell:
+
+```js
+db.artworks.getIndexes()
+db.users.getIndexes()
+```
+
+---
+
 ### HTTP Cache-Control headers
 
 All GET endpoints return explicit `Cache-Control` headers so browsers and CDN proxies know what they can safely cache.
