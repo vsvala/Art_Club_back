@@ -58,8 +58,8 @@ Create a `.env` file in the project root:
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub
 TEST_MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/artclub_test
 PORT=3003
-SECRET=<jwt-secret-key>
-TEST_SECRET=<jwt-secret-for-tests>
+SECRET=<jwt-secret-key>               # generate: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+TEST_SECRET=<jwt-secret-for-tests>    # can use the same command
 CLOUDINARY_CLOUD_NAME=<cloudinary-name>
 CLOUDINARY_API_KEY=<cloudinary-api-key>
 CLOUDINARY_API_SECRET=<cloudinary-api-secret>
