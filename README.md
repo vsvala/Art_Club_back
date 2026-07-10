@@ -228,6 +228,26 @@ mongoose.connect(config.MONGODB_URI, {
 })
 ```
 
+### HTTP Cache-Control headers
+
+All GET endpoints return explicit `Cache-Control` headers so browsers and CDN proxies know what they can safely cache.
+
+| Endpoint | Header | Reason |
+|---|---|---|
+| `GET /api/artworks` | `public, max-age=300` | Public data, same for all users |
+| `GET /api/artworks/:id` | `public, max-age=300` | Public data, same for all users |
+| `GET /api/users/artists` | `public, max-age=300` | Public data, same for all users |
+| `GET /api/users/artist/:id` | `public, max-age=300` | Public data, same for all users |
+| `GET /api/events` | `private, no-cache` | Requires login |
+| `GET /api/users/mypage` | `private, no-cache` | Returns the caller's own profile |
+| `GET /api/users/` | `private, no-cache` | Admin-only, sensitive data |
+| `GET /api/users/admin/:id` | `private, no-cache` | Auth-required, sensitive data |
+| `GET /api/weather` | `public, max-age=300` | External API — cached 5 min to reduce upstream calls |
+
+**`public, max-age=300`** — the browser (and any CDN in front of the API) may serve a cached copy for up to 5 minutes without hitting the server.
+
+**`private, no-cache`** — only the end-user's own browser may store the response, and it must revalidate with the server before reusing it. This prevents shared caches from accidentally serving one user's data to another.
+
 ---
 
 ## Authentication

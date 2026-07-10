@@ -135,6 +135,7 @@ app.get("/api/weather", async (req, res) => {
       return res.status(502).json({ error: "Weather data unavailable" });
     }
 
+    res.set("Cache-Control", "public, max-age=300");
     res.json({
       city: place.name,
       country: place.country,
