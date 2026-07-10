@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 //schema tells to mongoose how to save objects
 const artworkSchema = new mongoose.Schema({
   galleryImage: { type: String, required: true },
-  artist: { type: String, required: true },
+  artist: { type: String, required: true, index: true },
   name: { type: String, required: true },
   year: { type: Number, required: true },
   size: { type: String, required: true },
@@ -13,6 +13,7 @@ const artworkSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "User",
+    index: true,
   },
 });
 

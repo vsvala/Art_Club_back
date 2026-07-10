@@ -54,6 +54,17 @@ if (sentryIngestOrigins.length === 0) {
     }
   }
 }
+//sync indexes for artwork and user models
+// mongoose.connect(config.MONGODB_URI).then(async () => {
+//   logger.info("connected to MongoDB");
+//   if (process.env.NODE_ENV !== "test") {
+//     await Promise.all([
+//       require("./models/artwork").syncIndexes(),
+//       require("./models/user").syncIndexes(),
+//     ]);
+//     logger.info("indexes synced");
+//   }
+// });
 
 logger.info("connecting to MongoDB...");
 mongoose
