@@ -196,6 +196,40 @@ For the fuller set of flow diagrams and model notes, see [docs/architecture.md](
 
 ---
 
+## Scalability
+
+### Connection pooling
+
+Mongoose uses the MongoDB Node.js driver under the hood, which maintains a **connection pool** automatically when you call `mongoose.connect()`. A pool is a set of pre-opened database connections that are reused across requests — instead of opening and closing a connection on every query (slow), the app borrows a connection from the pool, uses it, and returns it.
+
+**Default behaviour in this project (`app.js`):**
+
+```js
+mongoose.connect(config.MONGODB_URI)  // creates a pool automatically
+```
+
+The MongoDB Node.js driver defaults are:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `maxPoolSize` | **100** | Max simultaneous connections |
+| `minPoolSize` | `0` | No idle connections kept alive |
+| `serverSelectionTimeoutMS` | `30000` | Timeout if no server found (ms) |
+
+Source: [MongoDB Node.js driver — Connection options](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/)
+
+For most small-to-medium apps the defaults are fine. If needed, override in `app.js`:
+
+```js
+mongoose.connect(config.MONGODB_URI, {
+  maxPoolSize: 10,               // cap connections for a small server
+  minPoolSize: 2,                // keep 2 warm so first requests are fast
+  serverSelectionTimeoutMS: 5000,
+})
+```
+
+---
+
 ## Authentication
 
 The API uses **JWT Bearer tokens**. After login, the token must be sent with every protected request in the Authorization header:

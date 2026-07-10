@@ -7,6 +7,7 @@ const artworkService = require("../services/artworkService");
 artworksRouter.get("/", async (req, res, next) => {
   try {
     const result = await artworkService.getArtworks(req.query);
+    res.set("Cache-Control", "public, max-age=300"); // 5min
     res.status(200).json(result);
   } catch (error) {
     next(error);
@@ -16,6 +17,7 @@ artworksRouter.get("/", async (req, res, next) => {
 artworksRouter.get("/:id", async (req, res, next) => {
   try {
     const artwork = await artworkService.getArtworkById(req.params.id);
+    res.set("Cache-Control", "public, max-age=300");
     res.status(200).json(artwork);
   } catch (error) {
     next(error);

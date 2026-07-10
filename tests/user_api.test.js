@@ -1,5 +1,6 @@
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 const app = require("../app");
 const User = require("../models/user");
 

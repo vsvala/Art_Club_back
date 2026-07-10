@@ -1,4 +1,5 @@
 const supertest = require("supertest");
+const mongoose = require("mongoose");
 const app = require("../app");
 
 const api = supertest(app);
@@ -234,4 +235,8 @@ describe("pagination", () => {
     expect(res.body.artworks).toHaveLength(0);
     expect(res.body.hasMore).toBe(false);
   });
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
 });

@@ -13,6 +13,7 @@ const userService = require("../services/userService");
 usersRouter.get("/", checkAdmin, async (req, res, next) => {
   try {
     const users = await userService.getAllUsers();
+    res.set("Cache-Control", "private, no-cache");
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -23,6 +24,7 @@ usersRouter.get("/", checkAdmin, async (req, res, next) => {
 usersRouter.get("/artists", async (req, res, next) => {
   try {
     const users = await userService.getAllArtists();
+    res.set("Cache-Control", "public, max-age=300");
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -33,6 +35,7 @@ usersRouter.get("/artists", async (req, res, next) => {
 usersRouter.get("/admin/:id", checkUser, async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.params.id);
+    res.set("Cache-Control", "private, no-cache");
     res.json(user);
   } catch (error) {
     next(error);
@@ -43,6 +46,7 @@ usersRouter.get("/admin/:id", checkUser, async (req, res, next) => {
 usersRouter.get("/artist/:id", async (req, res, next) => {
   try {
     const user = await userService.getSingleArtistById(req.params.id);
+    res.set("Cache-Control", "public, max-age=300");
     res.json(user);
   } catch (error) {
     next(error);
@@ -53,6 +57,7 @@ usersRouter.get("/mypage", checkLogin, async (req, res, next) => {
   try {
     const token = authenticateToken(req);
     const user = await userService.getUserById(token.id);
+    res.set("Cache-Control", "private, no-cache");
     res.json(user);
   } catch (error) {
     next(error);

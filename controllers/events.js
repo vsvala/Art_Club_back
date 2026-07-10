@@ -8,6 +8,7 @@ const { upload, uploadToCloudinary, deleteFromCloudinary } = require("../utils/u
 eventsRouter.get("/", checkLogin, async (req, res, next) => {
   try {
     const events = await eventService.getAllEvents();
+    res.set("Cache-Control", "private, no-cache");
     res.json(events);
   } catch (error) {
     next(error);

@@ -1,5 +1,6 @@
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 const app = require("../app");
 const User = require("../models/user");
 const Event = require("../models/event");
@@ -84,4 +85,8 @@ test("event deletion fails without a token", async () => {
   const id = events.body[0].id;
 
   await api.delete(`/api/events/${id}`).expect(401);
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
 });
