@@ -1,5 +1,8 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const Artwork = require("../models/artwork");
+const logger = require("../utils/logger");
+const { deleteFromCloudinary } = require("../utils/upload");
 
 const SALT_ROUNDS = 10;
 
@@ -133,6 +136,20 @@ const deleteUser = async (userId) => {
     const err = new Error("user not found");
     err.status = 404;
     throw err;
+  }
+  const artworks = await Artwork.find({ user: userId });
+  await Artwork.deleteMany({ user: userId });
+
+  if (process.env.NODE_ENV !== "test") {
+    await Promise.all(
+      artworks
+        .filter((artwork) => artwork.galleryImage)
+        .map((artwork) =>
+          deleteFromCloudinary(artwork.galleryImage).catch((cloudinaryError) => {
+            logger.error(`Cloudinary delete failed: ${cloudinaryError.message}`);
+          }),
+        ),
+    );
   }
 };
 
