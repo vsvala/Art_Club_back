@@ -49,8 +49,8 @@ const createArtwork = async ({ body, file, userId }) => {
   const imageUrl =
     process.env.NODE_ENV === "test"
       ? // Avoid real Cloudinary calls in tests — they're slow, cost quota,
-        // and require network access CI may not have.
-        "https://placehold.co/100x100.png"
+    // and require network access CI may not have.
+      "https://placehold.co/100x100.png"
       : await uploadToCloudinary(file.buffer, file.mimetype);
 
   const artwork = new Artwork({
