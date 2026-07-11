@@ -48,7 +48,9 @@ const createArtwork = async ({ body, file, userId }) => {
   }
   const imageUrl =
     process.env.NODE_ENV === "test"
-      ? "https://placehold.co/100x100.png"
+      ? // Avoid real Cloudinary calls in tests — they're slow, cost quota,
+        // and require network access CI may not have.
+        "https://placehold.co/100x100.png"
       : await uploadToCloudinary(file.buffer, file.mimetype);
 
   const artwork = new Artwork({
@@ -86,6 +88,8 @@ const deleteArtwork = async ({ artworkId, userId, role }) => {
     try {
       await deleteFromCloudinary(artwork.galleryImage);
     } catch (cloudinaryError) {
+      // Artwork is already deleted from the DB; a failed Cloudinary
+      // cleanup shouldn't roll that back or fail the request.
       logger.error(`Cloudinary delete failed: ${cloudinaryError.message}`);
     }
   }
