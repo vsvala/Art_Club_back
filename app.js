@@ -3,6 +3,9 @@ const Sentry = require("@sentry/node");
 const express = require("express");
 const path = require("path");
 const app = express();
+// Render sits in front of the app as a single reverse proxy, so the first
+// hop's X-Forwarded-For is trustworthy for rate-limiting/IP lookups.
+app.set("trust proxy", 1);
 const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
