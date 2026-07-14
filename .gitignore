@@ -60,6 +60,8 @@ secrets.*
 # Uploaded images — stored in Cloudinary, not in git
 uploads/
 
+coverage/
+
 
 update.md
 deploy.md
