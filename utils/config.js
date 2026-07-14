@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config({ override: true });
+  require("dotenv").config({ override: true, quiet: true });
 }
 
 let PORT = process.env.PORT;
