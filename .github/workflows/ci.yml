@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Hae frontin tuore build-artifact frontend-reposta
+      # Get fresh build-artifact from frontend-repos
       - name: Download frontend build
         uses: dawidd6/action-download-artifact@v6
         with:

@@ -94,9 +94,50 @@ npm run seed
 
 ## Testing
 
-- Run local tests with `npm test`; Jest runs in `--runInBand` mode and writes coverage to `./coverage/`.
+- Run local tests with `npm test`; Jest runs in `--runInBand` mode.
+- Run `npm run test:coverage` to also generate a coverage report in `./coverage/` (open `coverage/lcov-report/index.html` for a browsable breakdown).
 - Run lint checks with `npm run lint` before pushing changes.
 - Test DB and integration/E2E setup details: [docs/test-database-and-e2e.md](docs/test-database-and-e2e.md).
+- Coverage is uploaded to [Codecov](https://codecov.io/gh/vsvala/Art_Club_back) on every CI run — see the badge at the top of this file.
+- Testing framework: [Jest](https://jestjs.io/docs/getting-started) — see the official docs for configuration, matchers, and mocking.
+- API tests use [Supertest](https://github.com/forwardemail/supertest) to make HTTP requests against the Express app without a running server.
+
+### Running individual tests
+
+`npm test` runs all tests. When writing or debugging, it is often more practical to run only one or a few tests at a time. Jest offers several ways to do this.
+
+**Run only specific tests with `test.only`**
+
+Mark the tests you want to run:
+
+```js
+test.only('artworks are returned as json', async () => {
+  await api
+    .get('/api/artworks')
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+})
+```
+
+Jest will skip all other tests in the same file and run only the ones marked with `.only`. Remember to remove `.only` before committing.
+
+**Run a single test file**
+
+```bash
+npm test -- tests/artwork_api.test.js
+```
+
+**Run tests by name pattern**
+
+```bash
+npm test -- -t "a specific artwork is within the returned artworks"
+```
+
+The pattern can match a test name or a `describe` block name, and partial matches work too:
+
+```bash
+npm test -- -t "artwork"
+```
 
 ---
 
@@ -106,7 +147,7 @@ GitHub Actions runs automatically on pushes and pull requests to `master` with t
 
 | Job                 | Trigger                                           | What it does                                                                                                                                                          |
 | ------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci-build-and-test` | every push / PR                                   | installs deps (`npm ci`), runs lint, runs tests against a local MongoDB service container, runs `npm audit --audit-level=high`                                        |
+| `ci-build-and-test` | every push / PR                                   | installs deps (`npm ci`), runs lint, runs tests with coverage against a local MongoDB service container, uploads coverage to Codecov, runs `npm audit --audit-level=high` |
 | `docker-publish`    | push to `master` only (after `ci-build-and-test`) | downloads the frontend build artifact from [Art_Club](https://github.com/vsvala/Art_Club), logs in to GHCR, builds and pushes `ghcr.io/vsvala/artclub-backend:latest` |
 | `deploy`            | push to `master` only (not `#skip`)               | triggers a Render deploy hook, then polls `/api/health` every 15 s for up to 20 attempts (5 min total) — fails the job if the server does not respond 200             |
 | `tag_release`       | after successful `ci-build-and-test` + `deploy`   | auto-bumps the patch version tag via `anothrNick/github-tag-action`                                                                                                   |
