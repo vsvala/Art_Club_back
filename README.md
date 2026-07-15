@@ -1,7 +1,6 @@
 # Art Club — Backend API
 
 [![CI/CD Pipeline](https://github.com/vsvala/Art_Club_back/actions/workflows/ci.yml/badge.svg)](https://github.com/vsvala/Art_Club_back/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/vsvala/Art_Club_back/branch/master/graph/badge.svg)](https://codecov.io/gh/vsvala/Art_Club_back)
 
 [![codecov](https://codecov.io/github/vsvala/Art_Club_back/graph/badge.svg?token=99MJe8bisj)](https://codecov.io/github/vsvala/Art_Club_back)
 
