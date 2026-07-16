@@ -310,6 +310,36 @@ All GET endpoints return explicit `Cache-Control` headers so browsers and CDN pr
 
 **`private, no-cache`** — only the end-user's own browser may store the response, and it must revalidate with the server before reusing it. This prevents shared caches from accidentally serving one user's data to another.
 
+### Server-side caching (node-cache)
+
+In addition to HTTP `Cache-Control` headers that instruct browsers and CDN proxies, the API uses [node-cache](https://github.com/node-cache/node-cache) to cache responses **in process memory** on the server. This means repeated requests hit neither the database nor any external API — the cached result is returned immediately.
+
+| Endpoint            | Cache key                              | TTL    | Why                                                      |
+| ------------------- | -------------------------------------- | ------ | -------------------------------------------------------- |
+| `GET /api/artworks` | `artworks:<query params as JSON>`      | 5 min  | Avoids repeated MongoDB queries for the same filter set  |
+| `GET /api/weather`  | `weather:<city name (lowercased)>`     | 5 min  | Reduces calls to the external Open-Meteo API             |
+
+Each unique combination of query parameters gets its own cache entry so, for example, `?page=1&limit=20` and `?page=2&limit=20` are cached independently.
+
+**How it works:**
+
+```
+Request → check node-cache
+              │
+    hit ──────┘──► return cached JSON (no DB / API call)
+              │
+    miss ─────┘──► fetch from DB or external API
+                        │
+                        └──► store in node-cache with TTL
+                        └──► return JSON to client
+```
+
+**Trade-offs:**
+
+- Cache lives in the Node.js process — it is cleared on every server restart (e.g. Render redeploy).
+- Write operations (`POST`, `PUT`, `DELETE`) do not invalidate the cache. Stale data may be served for up to 5 minutes after a change. This is acceptable for artwork listings and weather data but is the reason events (which require login and change frequently) are not cached.
+- If the service ever scales to multiple instances, each process has its own independent cache. For multi-instance deployments, replace node-cache with a shared store such as Redis.
+
 ---
 
 ## Authentication
