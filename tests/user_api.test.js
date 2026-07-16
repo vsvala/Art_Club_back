@@ -3,10 +3,12 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const app = require("../app");
 const User = require("../models/user");
+const Artwork = require("../models/artwork");
 
 const api = supertest(app);
 
 beforeEach(async () => {
+  await Artwork.deleteMany({});
   await User.deleteMany({});
   const passwordHash = await bcrypt.hash("password123", 10);
   await User.create({

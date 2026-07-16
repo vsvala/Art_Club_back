@@ -3,8 +3,7 @@ const { authenticateToken, checkLogin } = require("../utils/checkRoute");
 const { upload } = require("../utils/upload");
 const { validateArtwork } = require("../utils/validators");
 const artworkService = require("../services/artworkService");
-const NodeCache = require("node-cache");
-const artworkCache = new NodeCache({ stdTTL: 300 }); // 5 min
+const { artworkCache } = require("../utils/caches");
 
 artworksRouter.get("/", async (req, res, next) => {
   try {
@@ -48,6 +47,7 @@ artworksRouter.post(
         file: req.file,
         userId: token.id,
       });
+      artworkCache.flushAll();
       res.status(200).json(artwork);
     } catch (error) {
       next(error);
@@ -63,6 +63,7 @@ artworksRouter.delete("/:id", checkLogin, async (req, res, next) => {
       userId: token.id,
       role: token.role,
     });
+    artworkCache.flushAll();
     res.status(204).end();
   } catch (error) {
     next(error);

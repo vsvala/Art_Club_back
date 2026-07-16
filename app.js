@@ -10,8 +10,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
 const { loginLimiter, apiLimiter } = require("./utils/limiters");
-const NodeCache = require("node-cache");
-const weatherCache = new NodeCache({ stdTTL: 300 }); // 5 min
+const { weatherCache } = require("./utils/caches");
 
 //Routrers
 const usersRouter = require("./controllers/users");

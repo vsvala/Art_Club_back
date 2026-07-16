@@ -2,11 +2,14 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Artwork = require("../models/artwork");
+const { artworkCache, weatherCache } = require("../utils/caches");
 
 router.post("/reset", async (req, res, next) => {
   try {
     await Artwork.deleteMany({});
     await User.deleteMany({});
+    artworkCache.flushAll();
+    weatherCache.flushAll();
     res.status(204).end();
   } catch (error) {
     next(error);
