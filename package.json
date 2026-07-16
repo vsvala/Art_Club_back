@@ -39,7 +39,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.24.1",
     "mongoose-unique-validator": "^5.0.2",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "node-cache": "^5.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

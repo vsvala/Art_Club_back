@@ -10,6 +10,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
 const { loginLimiter, apiLimiter } = require("./utils/limiters");
+const NodeCache = require("node-cache");
+const weatherCache = new NodeCache({ stdTTL: 300 }); // 5 min
 
 //Routrers
 const usersRouter = require("./controllers/users");
@@ -125,6 +127,13 @@ if (process.env.NODE_ENV === "test") {
 
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Helsinki";
+  const cacheKey = `weather:${city.toLowerCase()}`;
+
+  const cached = weatherCache.get(cacheKey);
+  if (cached) {
+    // console.log("Returning cached weather data for", city);
+    return res.json(cached);
+  }
 
   try {
     const geo = await fetch(
@@ -136,8 +145,6 @@ app.get("/api/weather", async (req, res) => {
       return res.status(404).json({ error: `City "${city}" not found` });
     }
     const place = geoData.results[0];
-    // console.log("place.latitude", place.latitude);
-    // console.log("place.longitude", place.longitude);
 
     const weather = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&timezone=auto`,
@@ -149,13 +156,16 @@ app.get("/api/weather", async (req, res) => {
       return res.status(502).json({ error: "Weather data unavailable" });
     }
 
-    res.set("Cache-Control", "public, max-age=300");
-    res.json({
+    const result = {
       city: place.name,
       country: place.country,
       temperature: weatherData.current.temperature_2m,
       weather_code: weatherData.current.weather_code,
-    });
+    };
+
+    weatherCache.set(cacheKey, result);
+    res.set("Cache-Control", "public, max-age=300");
+    res.json(result);
   } catch (error) {
     logger.error("Weather error:", error.message);
     res.status(500).json({ error: "Failed to fetch weather data" });

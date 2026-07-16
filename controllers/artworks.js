@@ -3,10 +3,21 @@ const { authenticateToken, checkLogin } = require("../utils/checkRoute");
 const { upload } = require("../utils/upload");
 const { validateArtwork } = require("../utils/validators");
 const artworkService = require("../services/artworkService");
+const NodeCache = require("node-cache");
+const artworkCache = new NodeCache({ stdTTL: 300 }); // 5 min
 
 artworksRouter.get("/", async (req, res, next) => {
   try {
+    const cacheKey = `artworks:${JSON.stringify(req.query)}`;
+
+    const cached = artworkCache.get(cacheKey);
+    if (cached) {
+      // console.log("Returning cached artworks data for", cacheKey);
+      return res.status(200).json(cached);
+    }
     const result = await artworkService.getArtworks(req.query);
+    artworkCache.set(cacheKey, result);
+
     res.set("Cache-Control", "public, max-age=300"); // 5min
     res.status(200).json(result);
   } catch (error) {
