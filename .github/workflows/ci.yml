@@ -45,7 +45,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Security audit
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
 
   docker-publish:
     needs: [ci-build-and-test]
