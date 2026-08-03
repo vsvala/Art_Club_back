@@ -69,7 +69,7 @@ Required because `multer-storage-cloudinary@4` declares support only for `cloudi
 
 **`package.json` — `overrides.tar`**
 
-Forces the `tar` package to the safe v7 version throughout the dependency tree. Reason: the `bcrypt` → `@mapbox/node-pre-gyp` chain otherwise pulls in a vulnerable version of `tar` for which no fix exists in the 6.x line.
+Forces the `tar` package to the safe v7 version throughout the dependency tree. Originally added because the `bcrypt` → `@mapbox/node-pre-gyp` chain pulled in a vulnerable version of `tar`. `bcrypt` was replaced with `bcryptjs` (pure JS, no native bindings) in a later change, and `tar`/`@mapbox/node-pre-gyp` no longer appear anywhere in `package-lock.json` — this override may now be safe to remove; kept for now but worth revisiting.
 
 **Jest vulnerabilities**
 

@@ -36,7 +36,7 @@ REST API Node.js/Express application for the Art Club gallery service. Uses Mong
 - **MongoDB** + **Mongoose** — database
 - **Cloudinary** — cloud image storage
 - **JWT** — user authentication
-- **bcrypt** — password hashing
+- **bcryptjs** — password hashing
 - **multer** — file uploads
 - **express-validator** — input validation
 - **Open-Meteo** — weather data (Geocoding + Forecast API, no API key required)
@@ -468,15 +468,35 @@ Then open `http://localhost:3003/debug-sentry` and confirm the event appears in 
 
 ### High priority
 
-- **Token refresh** — implement refresh token pattern so users stay logged in securely beyond the current 10 h JWT expiry
+- **Access token + refresh token via `httpOnly` cookies** — replace the current single long-lived JWT in `localStorage` with the pattern described below
 
 ### Production readiness
 
 - Add audit logging for admin actions and security-relevant events (role changes, user deletions)
-- Migrate JWT from `localStorage` to `httpOnly` cookies (see section below)
 
-### JWT storage
+### Planned authentication upgrade: access + refresh tokens via `httpOnly` cookies
 
-JWT tokens are currently stored in `localStorage`, which is accessible to JavaScript and therefore vulnerable to XSS attacks. A more secure alternative is to use `httpOnly` cookies, which cannot be read by JavaScript at all.
+JWT tokens are currently issued as a single long-lived Bearer token and stored in the frontend's `localStorage`. This is simple, but it has two weaknesses: `localStorage` is readable by any JavaScript running on the page (so an XSS bug becomes a token-theft bug), and a single long-lived token cannot be revoked before it naturally expires.
 
-Migrating to cookie-based auth requires changes on both sides: the backend would set and read the token via a cookie instead of the `Authorization` header, and the frontend would stop managing the token manually. This is a larger refactor and has been left as a future improvement.
+The planned fix is a standard **access token + refresh token** pattern:
+
+| Token         | Lifetime            | Storage                                                                 | Purpose                                                                |
+| ------------- | -------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Access token  | short (e.g. 15 min)  | kept in memory on the frontend, sent as `Authorization: Bearer <token>`  | authorizes individual API requests                                       |
+| Refresh token | longer (e.g. 7 days) | `httpOnly`, `Secure`, `SameSite=Strict` cookie                           | used only to request a new access token via a dedicated `/api/refresh` endpoint |
+
+When the access token expires, the frontend calls `/api/refresh`. The browser automatically attaches the refresh-token cookie — JavaScript never touches it — the backend validates it (and rotates it), and issues a new short-lived access token.
+
+**Why this is more secure, and what it defends against:**
+
+- **`httpOnly` defeats XSS token theft.** A cookie flagged `httpOnly` cannot be read by `document.cookie` or any other JavaScript API. Even if an attacker manages to inject a script into the page (a stored XSS bug), the refresh token is invisible to that script — there is nothing to exfiltrate. This is the core weakness of the current `localStorage` approach: any XSS bug there means an immediate, full account takeover.
+
+- **`Secure` defeats network interception.** The cookie is only ever sent over HTTPS, so a network attacker performing a man-in-the-middle attack on an insecure connection (e.g. public Wi-Fi) cannot capture it in transit.
+
+- **`SameSite=Strict` defeats CSRF.** The browser will not attach the cookie to a request that originates from a different site — not a forged cross-site form submission, not an `<img>`/`<script>` tag on an attacker's page. This closes off Cross-Site Request Forgery, where a malicious page tries to make the victim's browser fire an authenticated request against this API using the victim's own cookies.
+
+- **A short access-token lifetime limits the blast radius.** Because the access token is short-lived and held only in memory (never persisted to disk or `localStorage`), a leaked access token — via a malicious browser extension, an accidental log line, or a crash report — is only useful for a few minutes before it expires on its own.
+
+- **Server-side refresh-token revocation enables real logout.** Unlike a stateless JWT, a refresh token can be tracked and rotated on each use, so "log out everywhere" or "revoke this session" become possible — something a single long-lived JWT cannot do, since the server has no record of which tokens it has issued.
+
+This is a larger change affecting both backend (issuing/rotating refresh tokens, a `/api/refresh` endpoint, cookie-parsing middleware) and frontend (dropping `localStorage`, keeping the access token in memory, calling `/api/refresh` on a `401`), and is tracked as the top priority above.

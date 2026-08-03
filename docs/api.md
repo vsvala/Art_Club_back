@@ -138,9 +138,9 @@ The image is automatically uploaded to Cloudinary under the folder `artclub`.
 
 **Query parameters:**
 
-| Parameter | Required | Default    | Description          |
-| --------- | -------- | ---------- | -------------------- |
-| `city`    | No       | `Helsinki` | City name to look up |
+| Parameter | Required | Default    | Description                                                                          |
+| --------- | -------- | ---------- | ------------------------------------------------------------------------------------- |
+| `city`    | No       | `Helsinki` | City name to look up. Max 20 characters; letters, spaces, `.`, `'`, `-` only. |
 
 **Example request:**
 
@@ -154,7 +154,8 @@ GET /api/weather?city=Turku
 {
   "city": "Turku",
   "country": "Finland",
-  "temperature": 18.4
+  "temperature": 18.4,
+  "weather_code": 3
 }
 ```
 
@@ -182,11 +183,13 @@ sequenceDiagram
 
 **Error responses:**
 
-| Status | Meaning                                  |
-| ------ | ---------------------------------------- |
-| 404    | City not found in geocoding results      |
-| 502    | Weather data unavailable from Open-Meteo |
-| 500    | Unexpected server error                  |
+| Status | Meaning                                                    |
+| ------ | ----------------------------------------------------------- |
+| 400    | Invalid `city` parameter (too long or contains invalid characters) |
+| 404    | City not found in geocoding results                         |
+| 502    | Weather data unavailable from Open-Meteo                    |
+| 504    | Request to Open-Meteo timed out (5s)                         |
+| 500    | Unexpected server error                                     |
 
 ---
 
