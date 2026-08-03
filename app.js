@@ -10,54 +10,32 @@ const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
 const { loginLimiter, apiLimiter } = require("./utils/limiters");
-const { weatherCache } = require("./utils/caches");
 
-//Routrers
+//Routers
 const usersRouter = require("./controllers/users");
 const loginRouter = require("./controllers/login");
 const eventsRouter = require("./controllers/events");
 const artworksRouter = require("./controllers/artworks");
+const weatherRouter = require("./controllers/weather");
+
 const middleware = require("./utils/middleware.js");
 const logger = require("./utils/logger");
 const tokenCheckRouter = require("./controllers/tokenCheck");
 
+const { buildConnectSrc } = require("./utils/csp");
 const defaultCspDirectives = helmet.contentSecurityPolicy.getDefaultDirectives();
 
-const sentryDsnCandidates = [
-  process.env.SENTRY_DSN,
-  process.env.SENTRY_BROWSER_DSN,
-  process.env.VITE_SENTRY_DSN,
-  process.env.REACT_APP_SENTRY_DSN,
-  process.env.NEXT_PUBLIC_SENTRY_DSN,
-].filter(Boolean);
+const connectSrc = buildConnectSrc(
+  [
+    process.env.SENTRY_DSN,
+    process.env.SENTRY_BROWSER_DSN,
+    process.env.VITE_SENTRY_DSN,
+    process.env.REACT_APP_SENTRY_DSN,
+    process.env.NEXT_PUBLIC_SENTRY_DSN,
+  ],
+  defaultCspDirectives["connect-src"],
+);
 
-const sentryIngestOrigins = [];
-for (const dsn of sentryDsnCandidates) {
-  try {
-    const origin = new URL(dsn).origin;
-    if (!sentryIngestOrigins.includes(origin)) {
-      sentryIngestOrigins.push(origin);
-    }
-  } catch (error) {
-    logger.warn("Invalid Sentry DSN in env, skipping CSP origin", error.message);
-  }
-}
-
-const connectSrc = [...(defaultCspDirectives["connect-src"] || ["'self'"])];
-for (const origin of sentryIngestOrigins) {
-  if (!connectSrc.includes(origin)) {
-    connectSrc.push(origin);
-  }
-}
-
-if (sentryIngestOrigins.length === 0) {
-  const sentryFallbackOrigins = ["https://*.ingest.sentry.io", "https://*.ingest.de.sentry.io"];
-  for (const origin of sentryFallbackOrigins) {
-    if (!connectSrc.includes(origin)) {
-      connectSrc.push(origin);
-    }
-  }
-}
 //sync indexes for artwork and user models
 // mongoose.connect(config.MONGODB_URI).then(async () => {
 //   logger.info("connected to MongoDB");
@@ -74,11 +52,9 @@ logger.info("connecting to MongoDB...");
 mongoose
   .connect(config.MONGODB_URI)
   .then(() => {
-    //console.log('connected to MongoDB')
     logger.info("connected to MongoDB");
   })
   .catch((error) => {
-    //console.log('error connection to MongoDB:', error.message)
     logger.error("error connection to MongoDB:", error.message);
   });
 
@@ -98,7 +74,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? false // same origin, no CORS needed
+        ? false // same origin back end serves build, no CORS needed
         : "http://localhost:3000", // dev
   }),
 );
@@ -112,6 +88,8 @@ const apiUrl = "/api";
 app.use(`${apiUrl}/users`, apiLimiter, usersRouter);
 app.use(`${apiUrl}/artworks`, apiLimiter, artworksRouter);
 app.use(`${apiUrl}/events`, apiLimiter, eventsRouter);
+app.use(`${apiUrl}/weather`,apiLimiter, weatherRouter);
+
 if (process.env.NODE_ENV === "test") {
   app.use(`${apiUrl}/login`, loginRouter);
 } else {
@@ -124,52 +102,6 @@ if (process.env.NODE_ENV === "test") {
   app.use(`${apiUrl}/testing`, testingRouter);
 }
 
-app.get("/api/weather", async (req, res) => {
-  const city = req.query.city || "Helsinki";
-  const cacheKey = `weather:${city.toLowerCase()}`;
-
-  const cached = weatherCache.get(cacheKey);
-  if (cached) {
-    // console.log("Returning cached weather data for", city);
-    return res.json(cached);
-  }
-
-  try {
-    const geo = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=10&language=en&format=json`,
-    );
-    const geoData = await geo.json();
-
-    if (!geoData.results || geoData.results.length === 0) {
-      return res.status(404).json({ error: `City "${city}" not found` });
-    }
-    const place = geoData.results[0];
-
-    const weather = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&timezone=auto`,
-    );
-    const weatherData = await weather.json();
-
-    if (!weatherData.current || weatherData.current.temperature_2m === undefined) {
-      logger.error("Weather data missing current field:", JSON.stringify(weatherData));
-      return res.status(502).json({ error: "Weather data unavailable" });
-    }
-
-    const result = {
-      city: place.name,
-      country: place.country,
-      temperature: weatherData.current.temperature_2m,
-      weather_code: weatherData.current.weather_code,
-    };
-
-    weatherCache.set(cacheKey, result);
-    res.set("Cache-Control", "public, max-age=300");
-    res.json(result);
-  } catch (error) {
-    logger.error("Weather error:", error.message);
-    res.status(500).json({ error: "Failed to fetch weather data" });
-  }
-});
 
 app.get("/api/health", (req, res) => {
   const dbState = mongoose.connection.readyState;
