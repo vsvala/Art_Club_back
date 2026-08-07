@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkartclub=self.webpackChunkartclub||[]).push([[916],{5916(e,l,s){s.r(l);s(5043);var c=s(579);const i=()=>(0,c.jsxs)("div",{className:"nonMember",children:[(0,c.jsx)("h1",{children:"Art club"}),(0,c.jsx)("h3",{children:"Your membership application will be processed soon... "}),(0,c.jsx)("p",{children:" Once your application is approved, you'll get notification by email."})]}),r=i;s.d(l,["NonMember",0,i,"default",0,r])}}]);
-//# sourceMappingURL=916.fe81d650.chunk.js.map
